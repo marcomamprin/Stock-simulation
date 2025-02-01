@@ -79,7 +79,8 @@ function updatePerformanceTable(stockReturns, years) {
     tableBody.innerHTML = ""; // Clear table
 
     let yearlySteps = Math.round(stockReturns[0].length / years);
-    
+    let startYear = new Date().getFullYear(); // Get current year
+
     for (let year = 1; year <= years; year++) {
         let yearIndex = year * yearlySteps - 1;
         
@@ -92,10 +93,17 @@ function updatePerformanceTable(stockReturns, years) {
         let avgTop10 = finalValues.slice(top10Index).reduce((a, b) => a + b, 0) / (finalValues.length - top10Index);
         let avgBottom10 = finalValues.slice(0, bottom10Index).reduce((a, b) => a + b, 0) / bottom10Index;
 
-        let row = `<tr><td>${year}</td><td>€${Math.round(avgTop10)}</td><td>€${Math.round(avgBottom10)}</td></tr>`;
+        let actualYear = startYear + year - 1; // Calculate real year
+
+        let row = `<tr>
+            <td>${actualYear}</td> <!-- Show actual year -->
+            <td>€${Math.round(avgTop10)}</td>
+            <td>€${Math.round(avgBottom10)}</td>
+        </tr>`;
         tableBody.innerHTML += row;
     }
 }
+
 
 // Run on load
 simulate();
