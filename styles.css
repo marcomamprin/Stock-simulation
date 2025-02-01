@@ -115,26 +115,3 @@ input {
     background-color: #d1e7ff;
     transition: 0.3s;
 }
-
-/* Dark mode styles for table */
-.dark-mode .dark-table {
-    background-color: #222;
-    color: white;
-}
-
-.dark-mode .dark-table thead {
-    background-color: #444;
-}
-
-.dark-mode .dark-table tbody tr:nth-child(even) {
-    background-color: #333;
-}
-
-.dark-mode .dark-table tbody tr:nth-child(odd) {
-    background-color: #2a2a2a;
-}
-
-.dark-mode .dark-table tbody tr:hover {
-    background-color: #444;
-    transition: 0.3s;
-}
