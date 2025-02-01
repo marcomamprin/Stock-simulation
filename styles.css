@@ -83,3 +83,35 @@ input {
 .dark-mode button:hover {
     background: #cc8400;
 }
+
+#performanceTable {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 20px;
+    font-size: 16px;
+    text-align: center;
+}
+
+#performanceTable thead {
+    background-color: #007bff;
+    color: white;
+    font-weight: bold;
+}
+
+#performanceTable th, #performanceTable td {
+    padding: 12px;
+    border: 1px solid #ddd;
+}
+
+#performanceTable tbody tr:nth-child(even) {
+    background-color: #f8f9fa;
+}
+
+#performanceTable tbody tr:nth-child(odd) {
+    background-color: #ffffff;
+}
+
+#performanceTable tbody tr:hover {
+    background-color: #d1e7ff;
+    transition: 0.3s;
+}
