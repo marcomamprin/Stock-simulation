@@ -6,15 +6,15 @@ This project simulates stock price movements using a Geometric Brownian Motion (
 
 Features
 
-✅ Real-time stock price simulations
-✅ Adjustable parameters (return, volatility, risk, etc.)
-✅ Interactive Plotly charts
-✅ Dark mode support 🌙
-✅ Works on GitHub Pages (no server needed!)
+-✅ Real-time stock price simulations
+-✅ Adjustable parameters (return, volatility, risk, etc.)
+-✅ Interactive Plotly charts
+-✅ Dark mode support 🌙
+-✅ Works on GitHub Pages (no server needed!)
 
 Live Demo
 
-🔗 [Try it here](https//www.marcomamprin/Stock-simulation](https://www.marcomamprin.com/Stock-simulation/).
+🔗 [Try it here](www.marcomamprin/Stock-simulation](https://www.marcomamprin.com/Stock-simulation/).
 
 How It Works
 1. Adjust the parameters (number of stocks, initial price, volatility, etc.).
