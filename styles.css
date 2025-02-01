@@ -32,8 +32,6 @@ button {
     font-size: 14px;
     cursor: pointer;
     border-radius: 5px;
-    margin-top: 20px;
-    width: 200px; /* Adjust button width */
 }
 
 button:hover {
@@ -51,17 +49,10 @@ button:hover {
     margin-bottom: 20px;
 }
 
-.controls label {
+label {
     display: flex;
     align-items: center;
     justify-content: space-between;
-    width: 100%;
-}
-
-.controls label input,
-.controls label select {
-    width: 100%;
-    margin-top: 5px;
 }
 
 input {
