@@ -1,30 +1,34 @@
-// Dark mode toggle
 document.getElementById("darkModeToggle").addEventListener("click", function () {
     document.body.classList.toggle("dark-mode");
 });
 
-// Function to generate normally distributed random numbers
+// Generate normally distributed random numbers
 function randomNormal() {
-    let u = Math.random();
-    let v = Math.random();
+    let u = Math.random(), v = Math.random();
     return Math.sqrt(-2.0 * Math.log(u)) * Math.cos(2.0 * Math.PI * v);
 }
 
-// Function to simulate stock prices
-function simulateStockPrices(S0, mu, sigma, r, premium, N, dt) {
+// Simulate stock prices with deposits
+function simulateStockPrices(S0, mu, sigma, r, premium, N, dt, deposit, depositFreq) {
     let muAdjusted = r + premium;
     let stockPrices = [S0];
+    let depositInterval = depositFreq === "daily" ? 1 : depositFreq === "monthly" ? 21 : 252; // Convert to daily steps
 
     for (let i = 1; i < N; i++) {
         let dW = Math.sqrt(dt) * randomNormal();
         let logReturn = (muAdjusted - 0.5 * sigma ** 2) * dt + sigma * dW;
-        stockPrices.push(stockPrices[i - 1] * Math.exp(logReturn));
-    }
+        let newPrice = stockPrices[i - 1] * Math.exp(logReturn);
 
+        if (i % depositInterval === 0) {
+            newPrice += deposit;
+        }
+
+        stockPrices.push(newPrice);
+    }
     return stockPrices;
 }
 
-// Function to generate and plot stock price simulations
+// Generate stock paths and plot
 function simulate() {
     let numStocks = parseInt(document.getElementById("numStocks").value);
     let T = parseFloat(document.getElementById("timePeriod").value);
@@ -33,19 +37,24 @@ function simulate() {
     let sigma = parseFloat(document.getElementById("sigma").value);
     let r = parseFloat(document.getElementById("riskFreeRate").value);
     let premium = parseFloat(document.getElementById("premium").value);
-    
-    let dt = 1 / 252; // Daily time step
-    let N = Math.round(T / dt); // Number of steps
+    let deposit = parseFloat(document.getElementById("depositAmount").value);
+    let depositFreq = document.getElementById("depositFrequency").value;
+
+    let dt = 1 / 252;
+    let N = Math.round(T / dt);
     let traces = [];
+    let stockReturns = [];
+
     let today = new Date();
 
     for (let i = 0; i < numStocks; i++) {
-        let stockPath = simulateStockPrices(S0, mu, sigma, r, premium, N, dt);
-        
-        let dates = Array.from({length: N}, (_, i) => {
+        let stockPath = simulateStockPrices(S0, mu, sigma, r, premium, N, dt, deposit, depositFreq);
+        stockReturns.push(stockPath);
+
+        let dates = Array.from({ length: N }, (_, i) => {
             let d = new Date(today);
             d.setDate(d.getDate() + i);
-            return d.toISOString().split('T')[0]; // Format as YYYY-MM-DD
+            return d.toISOString().split('T')[0];
         });
 
         traces.push({ x: dates, y: stockPath, type: "scatter", mode: "lines", line: { width: 1 }, opacity: 0.5 });
@@ -60,7 +69,33 @@ function simulate() {
     };
 
     Plotly.newPlot("plot", traces, layout);
+
+    updatePerformanceTable(stockReturns, T);
 }
 
-// Auto-run simulation on page load
+// Update performance table
+function updatePerformanceTable(stockReturns, years) {
+    let tableBody = document.querySelector("#performanceTable tbody");
+    tableBody.innerHTML = ""; // Clear table
+
+    let yearlySteps = Math.round(stockReturns[0].length / years);
+    
+    for (let year = 1; year <= years; year++) {
+        let yearIndex = year * yearlySteps - 1;
+        
+        let finalValues = stockReturns.map(path => path[yearIndex]);
+        finalValues.sort((a, b) => a - b);
+
+        let top10Index = Math.floor(finalValues.length * 0.9);
+        let bottom10Index = Math.floor(finalValues.length * 0.1);
+
+        let avgTop10 = finalValues.slice(top10Index).reduce((a, b) => a + b, 0) / (finalValues.length - top10Index);
+        let avgBottom10 = finalValues.slice(0, bottom10Index).reduce((a, b) => a + b, 0) / bottom10Index;
+
+        let row = `<tr><td>${year}</td><td>€${avgTop10.toFixed(2)}</td><td>€${avgBottom10.toFixed(2)}</td></tr>`;
+        tableBody.innerHTML += row;
+    }
+}
+
+// Run on load
 simulate();
