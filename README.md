@@ -26,3 +26,7 @@ This project simulates stock price movements using the **Geometric Brownian Moti
 - **Plotly.js**: Interactive graphing for stock price visualizations.
 - **HTML + CSS**: User interface styling and design.
 - **GitHub Pages**: Hosting and deployment with no need for a server.
+
+### Copyright
+
+&copy; 2025 Marco Mamprin. All rights reserved.
