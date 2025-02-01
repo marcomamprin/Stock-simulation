@@ -28,7 +28,11 @@
             <label>🏦 Risk-Free Rate: <input type="number" id="riskFreeRate" value="0.02" step="0.01"></label>
             <label>📊 Risk Premium: <input type="number" id="premium" value="0.10" step="0.01"></label>
             
-            <label>💵 Additional Deposit: <input type="number" id="depositAmount" value="1000"></label>
+            <label>💵 Additional Deposit: 
+                <button type="button" onclick="changeDeposit(-100)">➖</button>
+                <input type="number" id="depositAmount" value="500" step="100">
+                <button type="button" onclick="changeDeposit(100)">➕</button>
+            </label>
             <label>📆 Deposit Frequency:
                 <select id="depositFrequency">
                     <option value="daily">Daily</option>
