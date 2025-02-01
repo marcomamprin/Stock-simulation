@@ -1,6 +1,7 @@
-document.getElementById("darkModeToggle").addEventListener("click", function () {
+document.getElementById("darkModeToggle").addEventListener("click", function() {
     document.body.classList.toggle("dark-mode");
-    
+});
+
     // Toggle dark mode for the performance table
     document.getElementById("performanceTable").classList.toggle("dark-table");
 });
