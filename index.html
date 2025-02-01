@@ -6,20 +6,27 @@
     <title>Stock Price Simulation</title>
     <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
     <script src="script.js" defer></script>
+    <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-    <h2>Stock Price Simulation (GBM Model)</h2>
-    <div>
-        <label>Number of Stocks: <input type="number" id="numStocks" value="50" min="10" max="100"></label>
-        <label>Time Period (Years): <input type="number" id="timePeriod" value="30" min="1" max="50"></label>
-        <label>Initial Stock Price: <input type="number" id="initialPrice" value="1000"></label>
-        <label>Expected Return: <input type="number" id="mu" value="0.12" step="0.01"></label>
-        <label>Volatility: <input type="number" id="sigma" value="0.15" step="0.01"></label>
-        <label>Risk-Free Rate: <input type="number" id="riskFreeRate" value="0.02" step="0.01"></label>
-        <label>Risk Premium: <input type="number" id="premium" value="0.10" step="0.01"></label>
-        <button onclick="simulate()">Run Simulation</button>
+    <div class="container">
+        <header>
+            <h1>Stock Price Simulation</h1>
+            <button id="darkModeToggle">🌙 Dark Mode</button>
+        </header>
+
+        <div class="controls">
+            <label>📊 Number of Stocks: <input type="number" id="numStocks" value="50" min="10" max="100"></label>
+            <label>📅 Time Period (Years): <input type="number" id="timePeriod" value="30" min="1" max="50"></label>
+            <label>💰 Initial Stock Price: <input type="number" id="initialPrice" value="1000"></label>
+            <label>📈 Expected Return: <input type="number" id="mu" value="0.12" step="0.01"></label>
+            <label>📊 Volatility: <input type="number" id="sigma" value="0.15" step="0.01"></label>
+            <label>🏦 Risk-Free Rate: <input type="number" id="riskFreeRate" value="0.02" step="0.01"></label>
+            <label>📊 Risk Premium: <input type="number" id="premium" value="0.10" step="0.01"></label>
+            <button onclick="simulate()">🔄 Run Simulation</button>
+        </div>
+
+        <div id="plot"></div>
     </div>
-    
-    <div id="plot"></div>
 </body>
 </html>

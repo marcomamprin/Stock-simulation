@@ -1,3 +1,8 @@
+// Dark mode toggle
+document.getElementById("darkModeToggle").addEventListener("click", function () {
+    document.body.classList.toggle("dark-mode");
+});
+
 // Function to generate normally distributed random numbers
 function randomNormal() {
     let u = Math.random();
@@ -32,19 +37,30 @@ function simulate() {
     let dt = 1 / 252; // Daily time step
     let N = Math.round(T / dt); // Number of steps
     let traces = [];
+    let today = new Date();
 
     for (let i = 0; i < numStocks; i++) {
         let stockPath = simulateStockPrices(S0, mu, sigma, r, premium, N, dt);
-        let xValues = Array.from({length: N}, (_, i) => i);
-        traces.push({ x: xValues, y: stockPath, type: "scatter", mode: "lines", line: { width: 1 }, opacity: 0.5 });
+        
+        let dates = Array.from({length: N}, (_, i) => {
+            let d = new Date(today);
+            d.setDate(d.getDate() + i);
+            return d.toISOString().split('T')[0]; // Format as YYYY-MM-DD
+        });
+
+        traces.push({ x: dates, y: stockPath, type: "scatter", mode: "lines", line: { width: 1 }, opacity: 0.5 });
     }
 
     let layout = {
         title: "Simulated Stock Prices Over Time",
-        xaxis: { title: "Time Steps" },
+        xaxis: { title: "Date", type: "date" },
         yaxis: { title: "Stock Price" },
-        showlegend: false
+        showlegend: false,
+        template: document.body.classList.contains("dark-mode") ? "plotly_dark" : "plotly_white"
     };
 
     Plotly.newPlot("plot", traces, layout);
 }
+
+// Auto-run simulation on page load
+simulate();
