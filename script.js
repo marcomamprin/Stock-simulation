@@ -50,14 +50,14 @@ function simulate() {
         let stockPath = simulateStockPrices(S0, mu, sigma, r, premium, N, dt, deposit, depositFreq);
         stockReturns.push(stockPath);
 
-        let years = Array.from({ length: N }, (_, i) => currentYear + Math.floor(i / (252 * dt)));
+        let years = Array.from({ length: N }, (_, i) => currentYear + (i * dt));
 
         traces.push({ x: years, y: stockPath, type: "scatter", mode: "lines", line: { width: 1 }, opacity: 0.5 });
     }
 
     let layout = {
         title: "Simulated Stock Prices Over Time",
-        xaxis: { title: "Year", type: "linear" },
+        xaxis: { title: "Year", type: "linear", tickformat: "d" },
         yaxis: { title: "Stock Price" },
         showlegend: false,
         template: document.body.classList.contains("dark-mode") ? "plotly_dark" : "plotly_white"
