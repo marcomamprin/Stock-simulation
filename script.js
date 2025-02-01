@@ -44,20 +44,25 @@ function simulate() {
     let N = Math.round(T / dt);
     let traces = [];
     let stockReturns = [];
-    let currentYear = new Date().getFullYear();
+
+    let today = new Date();
 
     for (let i = 0; i < numStocks; i++) {
         let stockPath = simulateStockPrices(S0, mu, sigma, r, premium, N, dt, deposit, depositFreq);
         stockReturns.push(stockPath);
 
-        let years = Array.from({ length: N }, (_, i) => currentYear + (i * dt));
+        let dates = Array.from({ length: N }, (_, i) => {
+            let d = new Date(today);
+            d.setDate(d.getDate() + i);
+            return d.toISOString().split('T')[0];
+        });
 
-        traces.push({ x: years, y: stockPath, type: "scatter", mode: "lines", line: { width: 1 }, opacity: 0.5 });
+        traces.push({ x: dates, y: stockPath, type: "scatter", mode: "lines", line: { width: 1 }, opacity: 0.5 });
     }
 
     let layout = {
         title: "Simulated Stock Prices Over Time",
-        xaxis: { title: "Year", type: "linear", tickformat: "d" },
+        xaxis: { title: "Date", type: "date" },
         yaxis: { title: "Stock Price" },
         showlegend: false,
         template: document.body.classList.contains("dark-mode") ? "plotly_dark" : "plotly_white"
@@ -65,19 +70,18 @@ function simulate() {
 
     Plotly.newPlot("plot", traces, layout);
 
-    updatePerformanceTable(stockReturns, T, currentYear);
+    updatePerformanceTable(stockReturns, T);
 }
 
 // Update performance table
-function updatePerformanceTable(stockReturns, years, startYear) {
+function updatePerformanceTable(stockReturns, years) {
     let tableBody = document.querySelector("#performanceTable tbody");
     tableBody.innerHTML = ""; // Clear table
 
     let yearlySteps = Math.round(stockReturns[0].length / years);
     
-    for (let year = 0; year < years; year++) {
-        let yearIndex = (year + 1) * yearlySteps - 1;
-        let currentYear = startYear + year;
+    for (let year = 1; year <= years; year++) {
+        let yearIndex = year * yearlySteps - 1;
         
         let finalValues = stockReturns.map(path => path[yearIndex]);
         finalValues.sort((a, b) => a - b);
@@ -88,10 +92,39 @@ function updatePerformanceTable(stockReturns, years, startYear) {
         let avgTop10 = finalValues.slice(top10Index).reduce((a, b) => a + b, 0) / (finalValues.length - top10Index);
         let avgBottom10 = finalValues.slice(0, bottom10Index).reduce((a, b) => a + b, 0) / bottom10Index;
 
-        let row = `<tr><td>${currentYear}</td><td>€${Math.round(avgTop10)}</td><td>€${Math.round(avgBottom10)}</td></tr>`;
+        let row = `<tr><td>${year}</td><td>€${Math.round(avgTop10)}</td><td>€${Math.round(avgBottom10)}</td></tr>`;
         tableBody.innerHTML += row;
     }
 }
+
+// Organizing UI elements visually
+document.addEventListener("DOMContentLoaded", function () {
+    let inputSection = document.getElementById("inputSection");
+    inputSection.innerHTML = `
+        <div style="display: flex; justify-content: space-around;">
+            <div>
+                <h3>Investment Parameters</h3>
+                <label>Number of Stocks: <input id="numStocks" type="number" /></label><br>
+                <label>Time Period (Years): <input id="timePeriod" type="number" /></label><br>
+                <label>Initial Stock Price: <input id="initialPrice" type="number" /></label><br>
+                <label>Additional Deposit: <input id="depositAmount" type="number" /></label><br>
+                <label>Deposit Frequency: <select id="depositFrequency">
+                    <option value="daily">Daily</option>
+                    <option value="monthly">Monthly</option>
+                    <option value="yearly">Yearly</option>
+                </select></label><br>
+            </div>
+            <div>
+                <h3>Market Parameters</h3>
+                <label>Expected Return: <input id="mu" type="number" /></label><br>
+                <label>Volatility: <input id="sigma" type="number" /></label><br>
+                <label>Risk-Free Rate: <input id="riskFreeRate" type="number" /></label><br>
+                <label>Risk Premium: <input id="premium" type="number" /></label><br>
+            </div>
+        </div>
+        <button onclick="simulate()">Simulate</button>
+    `;
+});
 
 // Run on load
 simulate();
