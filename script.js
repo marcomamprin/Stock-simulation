@@ -1,5 +1,8 @@
 document.getElementById("darkModeToggle").addEventListener("click", function () {
     document.body.classList.toggle("dark-mode");
+    
+    // Toggle dark mode for the performance table
+    document.getElementById("performanceTable").classList.toggle("dark-table");
 });
 
 // Generate normally distributed random numbers
@@ -84,26 +87,25 @@ function updatePerformanceTable(stockReturns, years) {
     for (let year = 1; year <= years; year++) {
         let yearIndex = year * yearlySteps - 1;
         
-        let finalValues = stockReturns.map(path => path[yearIndex]);
+        let finalValues = stockReturns.map(path => path[yearIndex]).filter(v => !isNaN(v));
         finalValues.sort((a, b) => a - b);
 
         let top10Index = Math.floor(finalValues.length * 0.9);
         let bottom10Index = Math.floor(finalValues.length * 0.1);
 
-        let avgTop10 = finalValues.slice(top10Index).reduce((a, b) => a + b, 0) / (finalValues.length - top10Index);
-        let avgBottom10 = finalValues.slice(0, bottom10Index).reduce((a, b) => a + b, 0) / bottom10Index;
+        let avgTop10 = top10Index > 0 ? finalValues.slice(top10Index).reduce((a, b) => a + b, 0) / (finalValues.length - top10Index) : 0;
+        let avgBottom10 = bottom10Index > 0 ? finalValues.slice(0, bottom10Index).reduce((a, b) => a + b, 0) / bottom10Index : 0;
 
         let actualYear = startYear + year - 1; // Calculate real year
 
         let row = `<tr>
-            <td>${actualYear}</td> <!-- Show actual year -->
+            <td>${actualYear}</td>
             <td>€${Math.round(avgTop10)}</td>
             <td>€${Math.round(avgBottom10)}</td>
         </tr>`;
         tableBody.innerHTML += row;
     }
 }
-
 
 // Run on load
 simulate();
