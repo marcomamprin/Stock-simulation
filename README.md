@@ -14,7 +14,7 @@ Features
 
 Live Demo
 
-🔗 Try it here (https://www.marcomamprin/Stock-simulation)
+🔗 Try it here [https//www.marcomamprin/Stock-simulation](https://www.marcomamprin.com/Stock-simulation/))
 
 How It Works
 	1.	Adjust the parameters (number of stocks, initial price, volatility, etc.).
