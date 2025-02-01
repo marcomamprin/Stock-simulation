@@ -6,11 +6,11 @@ This project simulates stock price movements using a Geometric Brownian Motion (
 
 Features
 
--✅ Real-time stock price simulations
--✅ Adjustable parameters (return, volatility, risk, etc.)
--✅ Interactive Plotly charts
--✅ Dark mode support 🌙
--✅ Works on GitHub Pages (no server needed!)
+- Real-time stock price simulations
+- Adjustable parameters (return, volatility, risk, etc.)
+- Interactive Plotly charts
+- Dark mode support 🌙 ✅ 
+- Works on GitHub Pages (no server needed!)
 
 Live Demo
 
