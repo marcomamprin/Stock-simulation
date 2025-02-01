@@ -97,34 +97,5 @@ function updatePerformanceTable(stockReturns, years) {
     }
 }
 
-// Organizing UI elements visually
-document.addEventListener("DOMContentLoaded", function () {
-    let inputSection = document.getElementById("inputSection");
-    inputSection.innerHTML = `
-        <div style="display: flex; justify-content: space-around;">
-            <div>
-                <h3>Investment Parameters</h3>
-                <label>Number of Stocks: <input id="numStocks" type="number" /></label><br>
-                <label>Time Period (Years): <input id="timePeriod" type="number" /></label><br>
-                <label>Initial Stock Price: <input id="initialPrice" type="number" /></label><br>
-                <label>Additional Deposit: <input id="depositAmount" type="number" /></label><br>
-                <label>Deposit Frequency: <select id="depositFrequency">
-                    <option value="daily">Daily</option>
-                    <option value="monthly">Monthly</option>
-                    <option value="yearly">Yearly</option>
-                </select></label><br>
-            </div>
-            <div>
-                <h3>Market Parameters</h3>
-                <label>Expected Return: <input id="mu" type="number" /></label><br>
-                <label>Volatility: <input id="sigma" type="number" /></label><br>
-                <label>Risk-Free Rate: <input id="riskFreeRate" type="number" /></label><br>
-                <label>Risk Premium: <input id="premium" type="number" /></label><br>
-            </div>
-        </div>
-        <button onclick="simulate()">Simulate</button>
-    `;
-});
-
 // Run on load
 simulate();
