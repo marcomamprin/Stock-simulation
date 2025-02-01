@@ -1,28 +1,28 @@
-# Stock-simulation
+# Stock Price Simulation 📈
 
-Stock Price Simulation 📈
+This project simulates stock price movements using the **Geometric Brownian Motion (GBM)** model, commonly used in financial markets to model the evolution of asset prices over time. The simulation runs entirely in your web browser, allowing users to adjust various financial parameters such as expected return, volatility, and the risk-free rate.
 
-This project simulates stock price movements using a Geometric Brownian Motion (GBM) model. The simulation runs entirely in the web browser and allows users to tweak parameters like expected return, volatility, and risk-free rate.
+### Key Features
 
-Features
+- **Real-time stock price simulation**: Generate stock price paths based on the GBM model.
+- **Adjustable parameters**: Customize variables like expected return, volatility, and risk-free rate to model different market conditions.
+- **Interactive charts**: Visualize stock price movements with interactive, real-time Plotly charts.
+- **Dark mode support**: Switch to a dark theme for a more comfortable viewing experience 🌙.
+- **No server required**: Hosted entirely on GitHub Pages for easy access and deployment.
 
-1. Real-time stock price simulations ✅ 
-2. Adjustable parameters (return, volatility, risk, etc.) ✅ 
-3. Interactive Plotly charts ✅ 
-4. Dark mode support 🌙 ✅ 
-5. Works on GitHub Pages (no server needed!) ✅ 
-
-Live Demo
+### Live Demo
 
 🔗 [Try it here](https://www.marcomamprin.com/Stock-simulation/)
 
-How It Works
-1. Adjust the parameters (number of stocks, initial price, volatility, etc.).
-2. Click “Run Simulation” to generate stock price paths.
-3. View the results as an interactive graph.
+### How It Works
 
-Technologies Used
-- JavaScript (Vanilla) for logic
-- Plotly.js for interactive graphs
-- HTML + CSS for UI styling
-- GitHub Pages for hosting
+1. **Adjust Parameters**: Set the number of stock paths, initial stock price, volatility, expected return, and other relevant variables.
+2. **Run Simulation**: Click the "Run Simulation" button to generate and visualize simulated stock price paths.
+3. **Analyze Results**: View the results in an interactive graph that allows for easy exploration of different market scenarios.
+
+### Technologies Used
+
+- **JavaScript (Vanilla)**: Logic and simulation implementation.
+- **Plotly.js**: Interactive graphing for stock price visualizations.
+- **HTML + CSS**: User interface styling and design.
+- **GitHub Pages**: Hosting and deployment with no need for a server.
