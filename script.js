@@ -44,25 +44,20 @@ function simulate() {
     let N = Math.round(T / dt);
     let traces = [];
     let stockReturns = [];
-
-    let today = new Date();
+    let currentYear = new Date().getFullYear();
 
     for (let i = 0; i < numStocks; i++) {
         let stockPath = simulateStockPrices(S0, mu, sigma, r, premium, N, dt, deposit, depositFreq);
         stockReturns.push(stockPath);
 
-        let dates = Array.from({ length: N }, (_, i) => {
-            let d = new Date(today);
-            d.setDate(d.getDate() + i);
-            return d.toISOString().split('T')[0];
-        });
+        let years = Array.from({ length: N }, (_, i) => currentYear + Math.floor(i / (252 * dt)));
 
-        traces.push({ x: dates, y: stockPath, type: "scatter", mode: "lines", line: { width: 1 }, opacity: 0.5 });
+        traces.push({ x: years, y: stockPath, type: "scatter", mode: "lines", line: { width: 1 }, opacity: 0.5 });
     }
 
     let layout = {
         title: "Simulated Stock Prices Over Time",
-        xaxis: { title: "Date", type: "date" },
+        xaxis: { title: "Year", type: "linear" },
         yaxis: { title: "Stock Price" },
         showlegend: false,
         template: document.body.classList.contains("dark-mode") ? "plotly_dark" : "plotly_white"
@@ -70,18 +65,19 @@ function simulate() {
 
     Plotly.newPlot("plot", traces, layout);
 
-    updatePerformanceTable(stockReturns, T);
+    updatePerformanceTable(stockReturns, T, currentYear);
 }
 
 // Update performance table
-function updatePerformanceTable(stockReturns, years) {
+function updatePerformanceTable(stockReturns, years, startYear) {
     let tableBody = document.querySelector("#performanceTable tbody");
     tableBody.innerHTML = ""; // Clear table
 
     let yearlySteps = Math.round(stockReturns[0].length / years);
     
-    for (let year = 1; year <= years; year++) {
-        let yearIndex = year * yearlySteps - 1;
+    for (let year = 0; year < years; year++) {
+        let yearIndex = (year + 1) * yearlySteps - 1;
+        let currentYear = startYear + year;
         
         let finalValues = stockReturns.map(path => path[yearIndex]);
         finalValues.sort((a, b) => a - b);
@@ -92,7 +88,7 @@ function updatePerformanceTable(stockReturns, years) {
         let avgTop10 = finalValues.slice(top10Index).reduce((a, b) => a + b, 0) / (finalValues.length - top10Index);
         let avgBottom10 = finalValues.slice(0, bottom10Index).reduce((a, b) => a + b, 0) / bottom10Index;
 
-        let row = `<tr><td>${year}</td><td>€${Math.round(avgTop10)}</td><td>€${Math.round(avgBottom10)}</td></tr>`;
+        let row = `<tr><td>${currentYear}</td><td>€${Math.round(avgTop10)}</td><td>€${Math.round(avgBottom10)}</td></tr>`;
         tableBody.innerHTML += row;
     }
 }
