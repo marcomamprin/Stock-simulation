@@ -92,7 +92,7 @@ function updatePerformanceTable(stockReturns, years) {
         let avgTop10 = finalValues.slice(top10Index).reduce((a, b) => a + b, 0) / (finalValues.length - top10Index);
         let avgBottom10 = finalValues.slice(0, bottom10Index).reduce((a, b) => a + b, 0) / bottom10Index;
 
-        let row = `<tr><td>${year}</td><td>€${avgTop10.toFixed(2)}</td><td>€${avgBottom10.toFixed(2)}</td></tr>`;
+        let row = `<tr><td>${year}</td><td>€${Math.round(avgTop10)}</td><td>€${Math.round(avgBottom10)}</td></tr>`;
         tableBody.innerHTML += row;
     }
 }
