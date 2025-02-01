@@ -80,8 +80,11 @@ function updatePerformanceTable(stockReturns, years) {
 
     let yearlySteps = Math.round(stockReturns[0].length / years);
     
-    for (let year = 1; year <= years; year++) {
-        let yearIndex = year * yearlySteps - 1;
+    // Get the current year
+    let currentYear = new Date().getFullYear();
+    
+    for (let year = currentYear; year < currentYear + years; year++) {
+        let yearIndex = (year - currentYear + 1) * yearlySteps - 1;
         
         let finalValues = stockReturns.map(path => path[yearIndex]);
         finalValues.sort((a, b) => a - b);
@@ -96,6 +99,7 @@ function updatePerformanceTable(stockReturns, years) {
         tableBody.innerHTML += row;
     }
 }
+
 
 // Run on load
 simulate();
