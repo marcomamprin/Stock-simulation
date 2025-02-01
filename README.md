@@ -14,15 +14,15 @@ Features
 
 Live Demo
 
-🔗 Try it here [https//www.marcomamprin/Stock-simulation](https://www.marcomamprin.com/Stock-simulation/))
+🔗 [Try it here](https//www.marcomamprin/Stock-simulation](https://www.marcomamprin.com/Stock-simulation/).
 
 How It Works
-	1.	Adjust the parameters (number of stocks, initial price, volatility, etc.).
-	2.	Click “Run Simulation” to generate stock price paths.
-	3.	View the results as an interactive graph.
+1. Adjust the parameters (number of stocks, initial price, volatility, etc.).
+2. Click “Run Simulation” to generate stock price paths.
+3. View the results as an interactive graph.
 
 Technologies Used
-	•	JavaScript (Vanilla) for logic
-	•	Plotly.js for interactive graphs
-	•	HTML + CSS for UI styling
-	•	GitHub Pages for hosting
+- JavaScript (Vanilla) for logic
+- Plotly.js for interactive graphs
+- HTML + CSS for UI styling
+- GitHub Pages for hosting
