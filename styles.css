@@ -66,8 +66,14 @@ input {
     text-align: center;
 }
 
+/* Plot Styling */
 #plot {
     margin-top: 20px;
+    padding: 20px;
+    background: white;
+    border-radius: 10px;
+    box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
+    transition: background 0.3s, color 0.3s;
 }
 
 /* Dark Mode Styling */
@@ -87,6 +93,13 @@ input {
 
 .dark-mode button:hover {
     background: #cc8400;
+}
+
+/* Dark Mode for Plot */
+.dark-mode #plot {
+    background: #222;
+    color: white;
+    box-shadow: 0px 0px 10px rgba(255, 255, 255, 0.1);
 }
 
 /* Table Styling */
@@ -125,7 +138,7 @@ input {
 
 /* Dark Mode Table Styling */
 .dark-mode #performanceTable thead {
-    background-color: #ffa500; /* Orange to match the dark mode button */
+    background-color: #ffa500;
     color: black;
 }
 
