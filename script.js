@@ -5,9 +5,7 @@ document.getElementById("darkModeToggle").addEventListener("click", function () 
     let newTemplate = document.body.classList.contains("dark-mode") ? "plotly_dark" : "plotly_white";
 
     // Update the plot layout dynamically
-    let update = {
-        template: newTemplate
-    };
+    let update = { template: newTemplate };
 
     Plotly.relayout("plot", update);
 });
@@ -40,14 +38,14 @@ function simulateStockPrices(S0, mu, sigma, r, premium, N, dt, deposit, depositF
 
 // Generate stock paths and plot
 function simulate() {
-    let numStocks = parseInt(document.getElementById("numStocks").value);
-    let T = parseFloat(document.getElementById("timePeriod").value);
-    let S0 = parseFloat(document.getElementById("initialPrice").value);
-    let mu = parseFloat(document.getElementById("mu").value);
-    let sigma = parseFloat(document.getElementById("sigma").value);
-    let r = parseFloat(document.getElementById("riskFreeRate").value);
-    let premium = parseFloat(document.getElementById("premium").value);
-    let deposit = parseFloat(document.getElementById("depositAmount").value);
+    let numStocks = parseInt(document.getElementById("numStocks").value) || 0;
+    let T = parseFloat(document.getElementById("timePeriod").value) || 0;
+    let S0 = parseFloat(document.getElementById("initialPrice").value) || 0;
+    let mu = parseFloat(document.getElementById("mu").value) || 0;
+    let sigma = parseFloat(document.getElementById("sigma").value) || 0;
+    let r = parseFloat(document.getElementById("riskFreeRate").value) || 0;
+    let premium = parseFloat(document.getElementById("premium").value) || 0;
+    let deposit = parseFloat(document.getElementById("depositAmount").value) || 0;
     let depositFreq = document.getElementById("depositFrequency").value;
 
     let dt = 1 / 252;
@@ -88,6 +86,8 @@ function updatePerformanceTable(stockReturns, years) {
     let tableBody = document.querySelector("#performanceTable tbody");
     tableBody.innerHTML = ""; // Clear table
 
+    if (stockReturns.length === 0 || years === 0) return;
+
     let yearlySteps = Math.round(stockReturns[0].length / years);
     
     // Get the current year
@@ -96,11 +96,13 @@ function updatePerformanceTable(stockReturns, years) {
     for (let year = currentYear; year < currentYear + years; year++) {
         let yearIndex = (year - currentYear + 1) * yearlySteps - 1;
         
-        let finalValues = stockReturns.map(path => path[yearIndex]);
+        let finalValues = stockReturns.map(path => path[yearIndex]).filter(v => !isNaN(v));
         finalValues.sort((a, b) => a - b);
 
+        if (finalValues.length === 0) continue;
+
         let top10Index = Math.floor(finalValues.length * 0.9);
-        let bottom10Index = Math.floor(finalValues.length * 0.1);
+        let bottom10Index = Math.floor(finalValues.length * 0.1) || 1; // Ensure at least one value for averaging
 
         let avgTop10 = finalValues.slice(top10Index).reduce((a, b) => a + b, 0) / (finalValues.length - top10Index);
         let avgBottom10 = finalValues.slice(0, bottom10Index).reduce((a, b) => a + b, 0) / bottom10Index;
@@ -109,7 +111,6 @@ function updatePerformanceTable(stockReturns, years) {
         tableBody.innerHTML += row;
     }
 }
-
 
 // Run on load
 simulate();
