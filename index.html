@@ -4,56 +4,62 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Stock Price Simulation</title>
-    <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
-    <script src="script.js" defer></script>
     <link rel="stylesheet" href="styles.css">
+    <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
 </head>
 <body>
     <div class="container">
         <header>
             <h1>Stock Price Simulation</h1>
-            <button id="darkModeToggle">🌙 Dark Mode</button>
+            <button id="darkModeToggle">Toggle Dark Mode</button>
         </header>
 
-    <div class="controls">
-        <label>📈 Number of Stocks: <input type="number" id="numStocks" value="10" min="1" max="100"></label>
-        <label>⏳ Time Period (Years): <input type="number" id="timePeriod" value="20" min="1" max="50"></label>
-        <label>💵 Initial Stock Price: <input type="number" id="initialPrice" value="1000" min="0" step="1000"></label>
-        <label>💰 Additional Deposit: <input type="number" id="depositAmount" value="50" step="50"></label>
-        <label>📅 Deposit Frequency:
-            <select id="depositFrequency">
-                <option value="daily">Daily</option>
-                <option value="monthly" selected>Monthly</option>
-                <option value="yearly">Yearly</option>
-            </select>
-        </label>
-    </div>
-    <div class="controls">
-        <label>📊 Expected Return: <input type="number" id="mu" value="0.12" step="0.01"></label>
-        <label>📉 Volatility: <input type="number" id="sigma" value="0.15" step="0.01"></label>
-        <label>🏦 Risk-Free Rate: <input type="number" id="riskFreeRate" value="0.02" step="0.01"></label>
-        <label>🔒 Risk Premium: <input type="number" id="premium" value="0.10" step="0.01"></label>
-        <button onclick="simulate()">🔄 Run Simulation</button>
-    </div>
+        <div class="controls">
+            <label>Model: 
+                <select id="modelSelect">
+                    <option value="brownian">Brownian Motion</option>
+                    <option value="compound">Compound Interest</option>
+                </select>
+            </label>
+            <label>Initial Price (€): <input type="number" id="initialPrice" value="100"></label>
+            <label>Expected Return (%): <input type="number" id="mu" value="5"></label>
+            <label>Volatility (%): <input type="number" id="sigma" value="20"></label>
+            <label>Investment Period (Years): <input type="number" id="timePeriod" value="10"></label>
+            <label>Deposit Amount (€): <input type="number" id="depositAmount" value="0"></label>
+            <label>Deposit Frequency: 
+                <select id="depositFrequency">
+                    <option value="none">None</option>
+                    <option value="daily">Daily</option>
+                    <option value="monthly">Monthly</option>
+                    <option value="yearly">Yearly</option>
+                </select>
+            </label>
+            <button onclick="simulate()">Run Simulation</button>
+        </div>
+
+        <p id="description">This simulation demonstrates different models of stock price growth over time, allowing users to compare traditional compound interest with stochastic Brownian motion.</p>
 
         <div id="plot"></div>
-        
-        <h2>📊 Performance Summary</h2>
-        <table id="performanceTable">
+
+        <div id="summary">
+            <h2>Total Return</h2>
+            <p>Best 10% Scenario: <span id="bestReturn">-</span></p>
+            <p>Worst 10% Scenario: <span id="worstReturn">-</span></p>
+        </div>
+
+        <button id="showTableBtn">Show Table</button>
+        <table id="performanceTable" style="display: none;">
             <thead>
                 <tr>
                     <th>Year</th>
-                    <th>Top 10% Avg Return (€)</th>
-                    <th>Worst 10% Avg Return (€)</th>
+                    <th>Best 10% (€)</th>
+                    <th>Worst 10% (€)</th>
                 </tr>
             </thead>
             <tbody></tbody>
         </table>
     </div>
 
-    <footer>
-        <p>&copy; 2025 Marco Mamprin. All rights reserved.</p>
-        <p>This simulation is based on the Brownian motion model for financial markets, which is commonly used to describe the random behavior of stock prices over time.</p>
-    </footer>
+    <script src="script.js"></script>
 </body>
 </html>
