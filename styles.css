@@ -76,6 +76,22 @@ input {
     transition: background 0.3s, color 0.3s;
 }
 
+/* Summary Section */
+#returnSummary {
+    font-size: 18px;
+    font-weight: bold;
+    margin-top: 20px;
+    padding: 15px;
+    background: #e9f5ff;
+    border-radius: 10px;
+    box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
+}
+
+.dark-mode #returnSummary {
+    background: #444;
+    color: white;
+}
+
 /* Dark Mode Styling */
 .dark-mode {
     background-color: #1a1a1a;
@@ -103,10 +119,14 @@ input {
 }
 
 /* Table Styling */
+#tableContainer {
+    display: none;
+    margin-top: 20px;
+}
+
 #performanceTable {
     width: 100%;
     border-collapse: collapse;
-    margin-top: 20px;
     font-size: 16px;
     text-align: center;
 }
