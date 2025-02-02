@@ -1,5 +1,11 @@
 document.getElementById("darkModeToggle").addEventListener("click", function () {
     document.body.classList.toggle("dark-mode");
+
+    // Get current Plotly template based on dark mode status
+    let newTemplate = document.body.classList.contains("dark-mode") ? "plotly_dark" : "plotly_white";
+
+    // Update the plot layout to match the new theme
+    Plotly.relayout("plot", { template: newTemplate });
 });
 
 // Generate normally distributed random numbers
