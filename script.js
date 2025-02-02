@@ -1,16 +1,18 @@
 document.getElementById("darkModeToggle").addEventListener("click", function () {
-    document.body.classList.toggle("dark-mode");
-
-    // Determine the correct Plotly template
-    let newTemplate = document.body.classList.contains("dark-mode") ? "plotly_dark" : "plotly_white";
-
-    // Update the plot layout dynamically
-    let update = {
-        template: newTemplate
-    };
-
-    Plotly.relayout("plot", update);
+    let darkMode = document.body.classList.toggle("dark-mode");
+    localStorage.setItem("darkMode", darkMode);
+    updatePlotTheme();
 });
+
+function updatePlotTheme() {
+    let template = document.body.classList.contains("dark-mode") ? "plotly_dark" : "plotly_white";
+    Plotly.relayout("plot", { template });
+}
+
+if (localStorage.getItem("darkMode") === "true") {
+    document.body.classList.add("dark-mode");
+}
+
 
 // Generate normally distributed random numbers
 function randomNormal() {
@@ -40,7 +42,7 @@ function simulateStockPrices(S0, mu, sigma, r, premium, N, dt, deposit, depositF
 
 // Generate stock paths and plot
 function simulate() {
-    let numStocks = parseInt(document.getElementById("numStocks").value);
+    let numStocks = getValidNumber("numStocks", 10);
     let T = parseFloat(document.getElementById("timePeriod").value);
     let S0 = parseFloat(document.getElementById("initialPrice").value);
     let mu = parseFloat(document.getElementById("mu").value);
@@ -67,7 +69,7 @@ function simulate() {
             return d.toISOString().split('T')[0];
         });
 
-        traces.push({ x: dates, y: stockPath, type: "scatter", mode: "lines", line: { width: 1 }, opacity: 0.5 });
+        traces.push({ x: dates, y: stockPath, type: "scatter", mode: "lines", line: { width: 1 }, opacity: numStocks > 20 ? 0.2 : 0.5 });
     }
 
     let layout = {
@@ -83,6 +85,17 @@ function simulate() {
     updatePerformanceTable(stockReturns, T);
 }
 
+function getValidNumber(id, defaultValue) {
+    let value = parseFloat(document.getElementById(id).value);
+    return isNaN(value) || value < 0 ? defaultValue : value;
+}
+
+function showLoading(state) {
+    let plotDiv = document.getElementById("plot");
+    plotDiv.innerHTML = state ? "<p>🔄 Running simulation...</p>" : "";
+}
+
+
 // Update performance table
 function updatePerformanceTable(stockReturns, years) {
     let tableBody = document.querySelector("#performanceTable tbody");
@@ -94,7 +107,7 @@ function updatePerformanceTable(stockReturns, years) {
     let currentYear = new Date().getFullYear();
     
     for (let year = currentYear; year < currentYear + years; year++) {
-        let yearIndex = (year - currentYear + 1) * yearlySteps - 1;
+        let yearIndex = Math.min((year - currentYear) * yearlySteps, stockReturns[0].length - 1);
         
         let finalValues = stockReturns.map(path => path[yearIndex]);
         finalValues.sort((a, b) => a - b);
