@@ -1,3 +1,4 @@
+/* General Styling */
 body {
     font-family: Arial, sans-serif;
     background-color: #f4f4f4;
@@ -24,6 +25,7 @@ h1 {
     margin: 10px;
 }
 
+/* Button Styling */
 button {
     background: #007BFF;
     color: white;
@@ -32,12 +34,14 @@ button {
     font-size: 14px;
     cursor: pointer;
     border-radius: 5px;
+    transition: background 0.3s;
 }
 
 button:hover {
     background: #0056b3;
 }
 
+/* Controls Section */
 .controls {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
@@ -66,6 +70,7 @@ input {
     margin-top: 20px;
 }
 
+/* Dark Mode Styling */
 .dark-mode {
     background-color: #1a1a1a;
     color: #f4f4f4;
@@ -84,6 +89,7 @@ input {
     background: #cc8400;
 }
 
+/* Table Styling */
 #performanceTable {
     width: 100%;
     border-collapse: collapse;
@@ -98,7 +104,8 @@ input {
     font-weight: bold;
 }
 
-#performanceTable th, #performanceTable td {
+#performanceTable th, 
+#performanceTable td {
     padding: 12px;
     border: 1px solid #ddd;
 }
@@ -114,4 +121,28 @@ input {
 #performanceTable tbody tr:hover {
     background-color: #d1e7ff;
     transition: 0.3s;
+}
+
+/* Dark Mode Table Styling */
+.dark-mode #performanceTable thead {
+    background-color: #ffa500; /* Orange to match the dark mode button */
+    color: black;
+}
+
+.dark-mode #performanceTable th, 
+.dark-mode #performanceTable td {
+    border-color: #555;
+    color: white;
+}
+
+.dark-mode #performanceTable tbody tr:nth-child(even) {
+    background-color: #333;
+}
+
+.dark-mode #performanceTable tbody tr:nth-child(odd) {
+    background-color: #222;
+}
+
+.dark-mode #performanceTable tbody tr:hover {
+    background-color: #444;
 }
