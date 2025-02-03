@@ -31,15 +31,20 @@
     <div class="controls">
         <label>📊 Expected Return: <input type="number" id="mu" value="0.12" step="0.01"></label>
         <label>📉 Volatility: <input type="number" id="sigma" value="0.15" step="0.01"></label>
-        <label>🏦 Risk-Free Rate: <input type="number" id="riskFreeRate" value="0.02" step="0.01"></label>
-        <label>🔒 Risk Premium: <input type="number" id="premium" value="0.10" step="0.01"></label>
         <div class="center-button">
             <button onclick="simulate()">🔄 Run Simulation</button>
         </div>
     </div>
 
+    <div id="returnsContainer">
         <div id="plot"></div>
+    </div>
+    
+    <div id="plotContainer">
+        <div id="plot"></div>
+    </div>
         
+    <div id="performanceTableContainer">
         <h2>📊 Performance Summary</h2>
         <table id="performanceTable">
             <thead>
