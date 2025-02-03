@@ -12,7 +12,7 @@ This project simulates stock price movements using the **Geometric Brownian Moti
 
 ### Live Demo
 
-🔗 [Try it here](https://www.marcomamprin.com/Stock-simulation/)
+🔗 [Try it here](https://www.marcomamprin.com/risk-dynamics/)
 
 ### How It Works
 
