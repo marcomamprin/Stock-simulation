@@ -21,14 +21,13 @@ function randomNormal() {
 }
 
 // Simulate stock prices with deposits
-function simulateStockPrices(S0, mu, sigma, r, premium, N, dt, deposit, depositFreq) {
-    let muAdjusted = r + premium;
+function simulateStockPrices(S0, mu, sigma, N, dt, deposit, depositFreq) {
     let stockPrices = [S0];
     let depositInterval = depositFreq === "daily" ? 1 : depositFreq === "monthly" ? 21 : 252; // Convert to daily steps
 
     for (let i = 1; i < N; i++) {
         let dW = Math.sqrt(dt) * randomNormal();
-        let logReturn = (muAdjusted - 0.5 * sigma ** 2) * dt + sigma * dW;
+        let logReturn = (mu - 0.5 * sigma ** 2) * dt + sigma * dW;
         let newPrice = stockPrices[i - 1] * Math.exp(logReturn);
 
         if (i % depositInterval === 0) {
@@ -47,8 +46,6 @@ function simulate() {
     let S0 = parseFloat(document.getElementById("initialPrice").value);
     let mu = parseFloat(document.getElementById("mu").value);
     let sigma = parseFloat(document.getElementById("sigma").value);
-    let r = parseFloat(document.getElementById("riskFreeRate").value);
-    let premium = parseFloat(document.getElementById("premium").value);
     let deposit = parseFloat(document.getElementById("depositAmount").value);
     let depositFreq = document.getElementById("depositFrequency").value;
 
@@ -60,7 +57,7 @@ function simulate() {
     let today = new Date();
 
     for (let i = 0; i < numStocks; i++) {
-        let stockPath = simulateStockPrices(S0, mu, sigma, r, premium, N, dt, deposit, depositFreq);
+        let stockPath = simulateStockPrices(S0, mu, sigma, N, dt, deposit, depositFreq);
         stockReturns.push(stockPath);
 
         let dates = Array.from({ length: N }, (_, i) => {
@@ -80,9 +77,26 @@ function simulate() {
         template: document.body.classList.contains("dark-mode") ? "plotly_dark" : "plotly_white"
     };
 
+    let { lastAvgTop10, lastAvgBottom10 } = updatePerformanceTable(stockReturns, T);
+    updateTotalReturns(lastAvgTop10, lastAvgBottom10);
+
+    let performanceTableContainer = document.getElementById("performanceTableContainer");
+    performanceTableContainer.style.display = "block";
+    
+    let returnsContainer = document.getElementById("returnsContainer");
+    returnsContainer.style.display = "block";
+
+    let plotContainer = document.getElementById("plotContainer");
+    plotContainer.style.display = "block"; // Show the plot container
+    
+    // Ensure the plot element is also displayed
+    let plotElement = document.getElementById("plot");
+    plotElement.style.display = "block"; // Show the plot element
+
+
     Plotly.newPlot("plot", traces, layout);
 
-    updatePerformanceTable(stockReturns, T);
+
 }
 
 function getValidNumber(id, defaultValue) {
@@ -105,6 +119,7 @@ function updatePerformanceTable(stockReturns, years) {
     
     // Get the current year
     let currentYear = new Date().getFullYear();
+    let lastAvgTop10, lastAvgBottom10;
     
     for (let year = currentYear; year < currentYear + years; year++) {
         let yearIndex = Math.min((year - currentYear) * yearlySteps, stockReturns[0].length - 1);
@@ -120,9 +135,26 @@ function updatePerformanceTable(stockReturns, years) {
 
         let row = `<tr><td>${year}</td><td>€${Math.round(avgTop10)}</td><td>€${Math.round(avgBottom10)}</td></tr>`;
         tableBody.innerHTML += row;
+
+        if (year === currentYear + years - 1) {
+            lastAvgTop10 = avgTop10;
+            lastAvgBottom10 = avgBottom10;
+        }
     }
+    return { lastAvgTop10, lastAvgBottom10 };
 }
 
+function updateTotalReturns(lastAvgTop10, lastAvgBottom10) {
+   
+    let returnsContainer = document.getElementById("returnsContainer");
+    returnsContainer.innerHTML = `
+        <h2>📈 Total Returns</h2>
+        <p>Top 10% Avg Return: €${Math.round(lastAvgTop10)}</p>
+        <p>Worst 10% Avg Return: €${Math.round(lastAvgBottom10)}</p>
+    `;
+}
 
 // Run on load
-simulate();
+document.getElementById("plotContainer").style.display = "none"; // Hide the plot container initially
+document.getElementById("performanceTableContainer").style.display = "none"; // Hide the plot container initially
+document.getElementById("returnsContainer").style.display = "none"; // Hide the returns container initially
