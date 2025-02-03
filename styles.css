@@ -41,9 +41,17 @@ button:hover {
     background: #0056b3;
 }
 
+.center-button {
+    display: flex;
+    justify-content: center;
+    width: 400%; /* Ensure the parent container takes full width */
+    margin-top: 20px; /* Optional: Add some margin to separate from other elements */
+}
+
 /* Controls Section */
 .controls {
     display: grid;
+    width: 100%;
     grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
     gap: 15px;
     padding: 20px;
