@@ -151,6 +151,11 @@ input {
     transition: 0.3s;
 }
 
+.highlight {
+    background-color: #0703d1;
+    font-weight: bold;
+}
+
 /* Dark Mode Styling */
 .dark-mode {
     background-color: #1a1a1a;
@@ -206,6 +211,11 @@ input {
 
 .dark-mode #performanceTable tbody tr:hover {
     background-color: #555;
+}
+
+.dark-mode .highlight {
+    background-color: #18a4f5;
+    color: black;
 }
 
 /* Responsive Styling */

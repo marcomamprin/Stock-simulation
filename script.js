@@ -115,8 +115,8 @@ function updateUI(stockReturns, traces, T) {
         template: document.body.classList.contains("dark-mode") ? "plotly_dark" : "plotly_white"
     };
     
-    let { lastAvgTop10, lastAvgBottom10 } = updatePerformanceTable(stockReturns, T);
-    updateTotalReturns(lastAvgTop10, lastAvgBottom10);
+    let { lastAvgTop10, lastAvgBottom10, lastMedian } = updatePerformanceTable(stockReturns, T);
+    updateTotalReturns(lastAvgTop10, lastAvgBottom10, lastMedian);
     
     document.getElementById("performanceTableContainer").style.display = "block";
     document.getElementById("returnsContainer").style.display = "block";
@@ -172,7 +172,7 @@ function updatePerformanceTable(stockReturns, years) {
     
     // Get the current year
     let currentYear = new Date().getFullYear();
-    let lastAvgTop10, lastAvgBottom10;
+    let lastAvgTop10, lastAvgBottom10, lastMedian;
     
     for (let year = currentYear; year < currentYear + years; year++) {
         let yearIndex = Math.min((year - currentYear + 1) * yearlySteps - 1, stockReturns[0].length - 1);
@@ -182,27 +182,46 @@ function updatePerformanceTable(stockReturns, years) {
 
         let top10Index = Math.floor(finalValues.length * 0.9);
         let bottom10Index = Math.floor(finalValues.length * 0.1);
+        let medianIndex = Math.floor(finalValues.length / 2);
 
         let avgTop10 = finalValues.slice(top10Index).reduce((a, b) => a + b, 0) / (finalValues.length - top10Index);
         let avgBottom10 = finalValues.slice(0, bottom10Index).reduce((a, b) => a + b, 0) / bottom10Index;
+        let median = finalValues.length % 2 === 0 ? (finalValues[medianIndex - 1] + finalValues[medianIndex]) / 2 : finalValues[medianIndex];
 
-        let row = `<tr><td>${year}</td><td>€${formatNumberWithCommas(Math.round(avgTop10))}</td><td>€${formatNumberWithCommas(Math.round(avgBottom10))}</td></tr>`;
+        let row = `<tr><td>${year}</td><td>€${formatNumberWithCommas(Math.round(avgTop10))}</td><td>€${formatNumberWithCommas(Math.round(median))}</td><td>€${formatNumberWithCommas(Math.round(avgBottom10))}</td></tr>`;
         tableBody.innerHTML += row;
 
         if (year === currentYear + years - 1) {
             lastAvgTop10 = avgTop10;
             lastAvgBottom10 = avgBottom10;
+            lastMedian = median;
         }
     }
-    return { lastAvgTop10, lastAvgBottom10 };
+    return { lastAvgTop10, lastAvgBottom10, lastMedian };
 }
 
-function updateTotalReturns(lastAvgTop10, lastAvgBottom10) {
+function updateTotalReturns(lastAvgTop10, lastAvgBottom10, lastMedian) {
     let returnsContainer = document.getElementById("returnsContainer");
     returnsContainer.innerHTML = `
-        <h2>📈 Total Returns</h2>
-        <p>Optimistic Scenarios 10% Avg Return: €${formatNumberWithCommas(Math.round(lastAvgTop10))}</p>
-        <p>Pessimistic Scenarios 10% Avg Return: €${formatNumberWithCommas(Math.round(lastAvgBottom10))}</p>
+        <h2 style="text-align: center;">📈 Total Portfolio Value</h2>
+        <table style="margin-left: auto; margin-right: auto;">
+            <tr>
+                <th style="text-align: right; padding-right: 20px;">Scenario</th>
+                <th style="text-align: right;">Value</th>
+            </tr>
+            <tr>
+                <td style="text-align: right; padding-right: 20px;" title="Best 10%">Optimistic Scenario</td>
+                <td style="text-align: right;">€${formatNumberWithCommas(Math.round(lastAvgTop10))}</td>
+            </tr>
+            <tr>
+                <td style="text-align: right; padding-right: 20px;" title="Computed as the median value">Average Scenario</td>
+                <td style="text-align: right;">€${formatNumberWithCommas(Math.round(lastMedian))}</td>
+            </tr>
+            <tr>
+                <td style="text-align: right; padding-right: 20px;" title="Worst 10%">Pessimistic Scenario</td>
+                <td style="text-align: right;">€${formatNumberWithCommas(Math.round(lastAvgBottom10))}</td>
+            </tr>
+        </table>
     `;
 }
 
