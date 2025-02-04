@@ -76,6 +76,10 @@ button:hover {
     margin-bottom: 20px;
 }
 
+.index-select {
+    margin-bottom: 20px;
+}
+
 label {
     display: flex;
     align-items: center;
