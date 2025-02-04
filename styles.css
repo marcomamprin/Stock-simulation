@@ -25,6 +25,21 @@ h1 {
     margin: 10px;
 }
 
+/* Decimal Input Styling */
+.decimal-input {
+    width: 100px;
+}
+
+.decimal-input::-webkit-outer-spin-button,
+.decimal-input::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+}
+
+.decimal-input:invalid {
+    border: 1px solid red;
+}
+
 /* Button Styling */
 button {
     background: #007BFF;
@@ -44,8 +59,8 @@ button:hover {
 .center-button {
     display: flex;
     justify-content: center;
-    width: 100%; /* Ensure the parent container takes full width */
-    margin-top: 20px; /* Optional: Add some margin to separate from other elements */
+    width: 100%;
+    margin-top: 20px;
 }
 
 /* Controls Section */
@@ -76,7 +91,7 @@ input {
 
 /* Plot Styling */
 #plot {
-    display: none; /* Hide the plot section initially */
+    display: none;
     margin-top: 20px;
     padding: 20px;
     background: white;
@@ -88,7 +103,7 @@ input {
 
 /* Returns Container Styling */
 #returnsContainer {
-    display: none; /* Hide the returns container initially */
+    display: none;
     margin-top: 20px;
     padding: 20px;
     background: white;
@@ -96,42 +111,6 @@ input {
     border-radius: 10px;
     box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
     transition: background 0.3s, color 0.3s;
-}
-
-/* Dark Mode Styling */
-.dark-mode {
-    background-color: #1a1a1a;
-    color: #f4f4f4;
-}
-
-.dark-mode .controls {
-    background: #333;
-    color: white;
-}
-
-.dark-mode button {
-    background: #ff9800;
-    color: black;
-}
-
-.dark-mode button:hover {
-    background: #cc8400;
-}
-
-/* Dark Mode for Plot */
-.dark-mode #plot {
-    background: #222;
-    color: white;
-    box-shadow: 0px 0px 10px rgba(255, 255, 255, 0.1);
-    border: 2px solid #444;
-}
-
-/* Dark Mode for Returns Container */
-.dark-mode #returnsContainer {
-    background: #222;
-    color: white;
-    box-shadow: 0px 0px 10px rgba(255, 255, 255, 0.1);
-    border: 2px solid #444;
 }
 
 /* Table Styling */
@@ -168,7 +147,40 @@ input {
     transition: 0.3s;
 }
 
-/* Dark Mode Table Styling */
+/* Dark Mode Styling */
+.dark-mode {
+    background-color: #1a1a1a;
+    color: #f4f4f4;
+}
+
+.dark-mode .controls {
+    background: #333;
+    color: white;
+}
+
+.dark-mode button {
+    background: #ff9800;
+    color: black;
+}
+
+.dark-mode button:hover {
+    background: #cc8400;
+}
+
+.dark-mode #plot {
+    background: #222;
+    color: white;
+    box-shadow: 0px 0px 10px rgba(255, 255, 255, 0.1);
+    border: 2px solid #444;
+}
+
+.dark-mode #returnsContainer {
+    background: #222;
+    color: white;
+    box-shadow: 0px 0px 10px rgba(255, 255, 255, 0.1);
+    border: 2px solid #444;
+}
+
 .dark-mode #performanceTable thead {
     background-color: #ffa500;
     color: black;
@@ -192,6 +204,7 @@ input {
     background-color: #555;
 }
 
+/* Responsive Styling */
 @media (max-width: 600px) {
     .controls {
         grid-template-columns: 1fr;
@@ -207,7 +220,7 @@ input {
     }
 }
 
+/* Transition Styling */
 body, .controls, #plot, #performanceTable {
     transition: background 0.3s ease, color 0.3s ease;
 }
-
