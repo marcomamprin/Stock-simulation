@@ -6,11 +6,22 @@ document.getElementById("darkModeToggle").addEventListener("click", function () 
 
 function updatePlotTheme() {
     let template = document.body.classList.contains("dark-mode") ? "plotly_dark" : "plotly_white";
-    Plotly.relayout("plot", { template });
+    let plotBgColor = document.body.classList.contains("dark-mode") ? "#222" : "#fff";
+    let fontColor = document.body.classList.contains("dark-mode") ? "#f4f4f4" : "#333";
+
+    Plotly.relayout("plot", { 
+        template, 
+        "paper_bgcolor": plotBgColor, 
+        "plot_bgcolor": plotBgColor,
+        "font.color": fontColor,
+        "xaxis.color": fontColor,
+        "yaxis.color": fontColor
+    });
 }
 
 if (localStorage.getItem("darkMode") === "true") {
     document.body.classList.add("dark-mode");
+    updatePlotTheme(); // Ensure the plot theme is updated on load
 }
 
 const indexData = {
@@ -29,6 +40,7 @@ const indexData = {
 
 document.getElementById("indexSelect").addEventListener("change", function () {
     let selectedIndex = this.value;
+    console.log("Selected index:", selectedIndex); // Debug line to check the selected value
     if (indexData[selectedIndex]) {
         document.getElementById("mu").value = indexData[selectedIndex].mu.toFixed(1);
         document.getElementById("sigma").value = indexData[selectedIndex].sigma.toFixed(1);
@@ -48,6 +60,10 @@ function randomNormal() {
 
 // Simulate stock prices with deposits
 function simulateStockPrices(S0, mu, sigma, N, dt, deposit, depositFreq) {
+    if (S0 <= 0 || sigma < 0 || N <= 0 || dt <= 0 || deposit < 0) {
+        throw new Error("Invalid input parameters for stock simulation.");
+    }
+
     let stockPrices = [S0];
     let depositInterval = depositFreq === "daily" ? 1 : depositFreq === "monthly" ? 21 : 252; // Convert to daily steps
 
@@ -67,15 +83,23 @@ function simulateStockPrices(S0, mu, sigma, N, dt, deposit, depositFreq) {
 
 // Get user inputs from the form
 function getUserInputs() {
-    return {
-        numStocks: getValidNumber("numStocks", 10),
-        T: parseFloat(document.getElementById("timePeriod").value),
-        S0: parseFloat(document.getElementById("initialPrice").value),
-        mu: parseFloat(document.getElementById("mu").value) / 100,
-        sigma: parseFloat(document.getElementById("sigma").value) / 100,
-        deposit: parseFloat(document.getElementById("depositAmount").value),
-        depositFreq: document.getElementById("depositFrequency").value
-    };
+    try {
+        let numStocks = getValidNumber("numStocks", 10);
+        let T = parseFloat(document.getElementById("timePeriod").value);
+        let S0 = parseFloat(document.getElementById("initialPrice").value);
+        let mu = parseFloat(document.getElementById("mu").value) / 100;
+        let sigma = parseFloat(document.getElementById("sigma").value) / 100;
+        let deposit = parseFloat(document.getElementById("depositAmount").value);
+        let depositFreq = document.getElementById("depositFrequency").value;
+
+        if (isNaN(T) || isNaN(S0) || isNaN(mu) || isNaN(sigma) || isNaN(deposit)) {
+            throw new Error("Invalid input values. Please check your inputs.");
+        }
+        return { numStocks, T, S0, mu, sigma, deposit, depositFreq };
+    } catch (error) {
+        alert(error.message);
+        throw error;
+    }
 }
 
 // Generate dates for market simulation
@@ -89,20 +113,21 @@ function generateMarketDates(N) {
 }
 
 // Simulate stock prices and update UI
-function simulate() {
+async function simulate() {
     let { numStocks, T, S0, mu, sigma, deposit, depositFreq } = getUserInputs();
     let dt = 1 / 252;
     let N = Math.round(T / dt);
     let traces = [];
     let stockReturns = [];
-    
-    for (let i = 0; i < numStocks; i++) {
+
+    await Promise.all(Array.from({ length: numStocks }, async () => {
         let stockPath = simulateStockPrices(S0, mu, sigma, N, dt, deposit, depositFreq);
         stockReturns.push(stockPath);
         traces.push({ x: generateMarketDates(N), y: stockPath, type: "scatter", mode: "lines", line: { width: 1 }, opacity: numStocks > 20 ? 0.2 : 0.5 });
-    }
+    }));
 
     updateUI(stockReturns, traces, T);
+    document.getElementById("savePdfButton").style.display = "block"; // Show the Save as PDF button
 }
 
 // Update UI elements and plot results
@@ -112,19 +137,31 @@ function updateUI(stockReturns, traces, T) {
         xaxis: { title: "Date", type: "date" },
         yaxis: { title: "Portfolio Price" },
         showlegend: false,
-        template: document.body.classList.contains("dark-mode") ? "plotly_dark" : "plotly_white"
+        template: document.body.classList.contains("dark-mode") ? "plotly_dark" : "plotly_white",
+        paper_bgcolor: document.body.classList.contains("dark-mode") ? "#222" : "#fff",
+        plot_bgcolor: document.body.classList.contains("dark-mode") ? "#222" : "#fff",
+        font: { color: document.body.classList.contains("dark-mode") ? "#f4f4f4" : "#333" },
+        xaxis: { color: document.body.classList.contains("dark-mode") ? "#f4f4f4" : "#333" },
+        yaxis: { color: document.body.classList.contains("dark-mode") ? "#f4f4f4" : "#333" }
     };
-    
-    let { lastAvgTop10, lastAvgBottom10, lastMedian } = updatePerformanceTable(stockReturns, T);
-    updateTotalReturns(lastAvgTop10, lastAvgBottom10, lastMedian);
-    
-    document.getElementById("performanceTableContainer").style.display = "block";
-    document.getElementById("returnsContainer").style.display = "block";
-    document.getElementById("plotContainer").style.display = "block";
-    document.getElementById("plot").style.display = "block";
+
+    updatePerformanceAndUI(stockReturns, T);
 
     Plotly.newPlot("plot", traces, layout);
 }
+
+// Separate function for updating performance and UI elements
+function updatePerformanceAndUI(stockReturns, T) {
+    let { lastAvgTop10, lastAvgBottom10, lastMedian } = updatePerformanceTable(stockReturns, T);
+    updateTotalReturns(lastAvgTop10, lastAvgBottom10, lastMedian);
+
+    document.getElementById("performanceTableContainer").style.display = "block";
+    document.getElementById("totalPortfolioValueContainer").style.display = "block";
+    document.getElementById("plotContainer").style.display = "block";
+    document.getElementById("plot").style.display = "block";
+}
+
+
 
 
 function getValidNumber(id, defaultValue) {
@@ -201,7 +238,7 @@ function updatePerformanceTable(stockReturns, years) {
 }
 
 function updateTotalReturns(lastAvgTop10, lastAvgBottom10, lastMedian) {
-    let returnsContainer = document.getElementById("returnsContainer");
+    let returnsContainer = document.getElementById("totalPortfolioValueContainer");
     returnsContainer.innerHTML = `
         <h2 style="text-align: center;">📈 Total Portfolio Value</h2>
         <table style="margin-left: auto; margin-right: auto;">
@@ -225,7 +262,55 @@ function updateTotalReturns(lastAvgTop10, lastAvgBottom10, lastMedian) {
     `;
 }
 
+function generatePDF() {
+    const { jsPDF } = window.jspdf;
+    const doc = new jsPDF();
+
+    doc.setFontSize(8);
+    doc.text("Portfolio Management Tool", 10, 10);
+    doc.text(`Number of Simulations: ${document.getElementById("numStocks").value}`, 10, 15);
+    doc.text(`Time Period (Years): ${document.getElementById("timePeriod").value}`, 10, 20);
+    doc.text(`Initial Portfolio Price: ${document.getElementById("initialPrice").value}`, 10, 25);
+    doc.text(`Additional Deposit: ${document.getElementById("depositAmount").value}`, 10, 30);
+    doc.text(`Deposit Frequency: ${document.getElementById("depositFrequency").value}`, 10, 35);
+    doc.text(`Expected Return: ${document.getElementById("mu").value}`, 10, 40);
+    doc.text(`Volatility: ${document.getElementById("sigma").value}`, 10, 45);
+
+    doc.text("Total Portfolio Value:", 10, 100);
+    const plotElement = document.getElementById("plot").getElementsByTagName("canvas")[0];
+    if (plotElement) {
+        const plotImage = plotElement.toDataURL("image/png");
+        doc.addImage(plotImage, 'PNG', 10, 110, 180, 80);
+    }
+
+    doc.addPage();
+    doc.text("Performance Summary:", 10, 10);
+    const table = document.getElementById("performanceTable");
+    const rows = table.querySelectorAll("tr");
+    let y = 20;
+    rows.forEach(row => {
+        const cells = row.querySelectorAll("th, td");
+        let x = 10;
+        cells.forEach(cell => {
+            doc.text(cell.innerText, x, y);
+            x += 50;
+        });
+        y += 10;
+        if (y > 280) { // Add a new page if the content exceeds the page height
+            doc.addPage();
+            y = 20; // Reset y when a new page is added
+        }
+    });
+
+    const now = new Date();
+    const fileName = `portfolio_management_tool_${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}_${String(now.getHours()).padStart(2, '0')}-${String(now.getMinutes()).padStart(2, '0')}-${String(now.getSeconds()).padStart(2, '0')}.pdf`;
+    doc.save(fileName);
+}
+
+
+
 // Run on load
 document.getElementById("plotContainer").style.display = "none"; // Hide the plot container initially
 document.getElementById("performanceTableContainer").style.display = "none"; // Hide the plot container initially
 document.getElementById("returnsContainer").style.display = "none"; // Hide the returns container initially
+document.getElementById("savePdfButton").style.display = "none"; // Hide the Save as PDF button initially

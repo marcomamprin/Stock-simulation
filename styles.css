@@ -1,4 +1,5 @@
 /* General Styling */
+/* Basic styling for the body and general containers */
 body {
     font-family: Arial, sans-serif;
     background-color: #f4f4f4;
@@ -9,10 +10,11 @@ body {
     transition: background 0.3s, color 0.3s;
 }
 
-.container {
-    max-width: 900px;
-    margin: auto;
-    padding: 20px;
+.container, .controls {
+    width: 100%;
+    max-width: 1200px;
+    margin: 0 auto; /* Center the containers */
+    padding: 0px;
 }
 
 header {
@@ -26,14 +28,17 @@ h1 {
 }
 
 /* Decimal Input Styling */
+/* Styling for decimal input fields */
 .decimal-input {
     width: 100px;
 }
 
-.decimal-input::-webkit-outer-spin-button,
-.decimal-input::-webkit-inner-spin-button {
-    -webkit-appearance: none;
-    margin: 0;
+@media (min-width: 600px) {
+    .decimal-input::-webkit-outer-spin-button,
+    .decimal-input::-webkit-inner-spin-button {
+        -webkit-appearance: none;
+        margin: 0;
+    }
 }
 
 .decimal-input:invalid {
@@ -41,6 +46,7 @@ h1 {
 }
 
 /* Button Styling */
+/* Styling for buttons */
 button {
     background: #007BFF;
     color: white;
@@ -64,13 +70,16 @@ button:hover {
 }
 
 /* Controls Section */
+/* Styling for the controls section */
 .controls {
+    max-width: 1200px;
     display: grid;
     width: 100%;
     grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
     gap: 15px;
     padding: 20px;
     background: white;
+    border: 2px solid #ddd;
     border-radius: 10px;
     box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
     margin-bottom: 20px;
@@ -94,34 +103,65 @@ input {
 }
 
 /* Plot Styling */
-#plot {
+
+
+/* Returns plotContainer Styling */
+#plotContainer{
+    width: 100%;
     display: none;
-    margin-top: 20px;
-    padding: 20px;
     background: white;
     border: 2px solid #ddd;
-    border-radius: 10px;
+    padding: 20px;
+    margin-top: 20px;
+    margin-bottom: 20px;
+    border-radius: 10px; /* Smooth the corners */
     box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
     transition: background 0.3s, color 0.3s;
 }
+
 
 /* Returns Container Styling */
-#returnsContainer {
+/* Styling for the returns container */
+#returnsContainer, #totalPortfolioValueContainer, #performanceTableContainer {
+    width: 100%;
+    max-width: 100%;
+    margin-top: 0px;
+    margin-bottom: 20px;
     display: none;
-    margin-top: 20px;
-    padding: 20px;
     background: white;
     border: 2px solid #ddd;
-    border-radius: 10px;
+    padding: 20px;
+    border-radius: 10px; /* Smooth the corners */
     box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
     transition: background 0.3s, color 0.3s;
 }
 
-/* Table Styling */
-#performanceTable {
+#performanceTableContainer {
+    display: none;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
     width: 100%;
+    max-width: 1200px;
+    margin-top: 0px;
+    margin-bottom: 20px;
+    background: white;
+    border: 2px solid #ddd;
+    padding: 20px;
+    border-radius: 10px; /* Smooth the corners */
+    box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
+    transition: background 0.3s, color 0.3s;
+}
+
+#performanceTable {
+    width: 95%;
+    max-width: 100%;
     border-collapse: collapse;
+    margin: 0 auto;
     margin-top: 20px;
+    margin-bottom: 20px;
+    margin-left: 20px;
+    margin-right: 20px;
     font-size: 16px;
     text-align: center;
 }
@@ -157,6 +197,7 @@ input {
 }
 
 /* Dark Mode Styling */
+/* Styling for dark mode */
 .dark-mode {
     background-color: #1a1a1a;
     color: #f4f4f4;
@@ -176,19 +217,13 @@ input {
     background: #cc8400;
 }
 
-.dark-mode #plot {
+.dark-mode #returnsContainer, .dark-mode #totalPortfolioValueContainer, .dark-mode #performanceTableContainer, .dark-mode #plotContainer {
     background: #222;
     color: white;
     box-shadow: 0px 0px 10px rgba(255, 255, 255, 0.1);
     border: 2px solid #444;
 }
 
-.dark-mode #returnsContainer {
-    background: #222;
-    color: white;
-    box-shadow: 0px 0px 10px rgba(255, 255, 255, 0.1);
-    border: 2px solid #444;
-}
 
 .dark-mode #performanceTable thead {
     background-color: #ffa500;
@@ -219,6 +254,7 @@ input {
 }
 
 /* Responsive Styling */
+/* Styling for responsiveness */
 @media (max-width: 600px) {
     .controls {
         grid-template-columns: 1fr;
@@ -235,6 +271,7 @@ input {
 }
 
 /* Transition Styling */
+/* Styling for transitions */
 body, .controls, #plot, #performanceTable {
     transition: background 0.3s ease, color 0.3s ease;
 }
