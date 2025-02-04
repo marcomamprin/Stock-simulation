@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Stock Price Simulation</title>
     <script async src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.4.0/jspdf.umd.min.js"></script>
     <script src="script.js" defer></script>
     <link rel="stylesheet" href="styles.css">
 </head>
@@ -52,11 +53,11 @@
         </div>
     </div>
 
-    <div id="returnsContainer">
+    <div id="totalPortfolioValueContainer" style="display: none;">
         <div id="plot"></div>
     </div>
     
-    <div id="plotContainer">
+    <div id="plotContainer" style="display: none;">
         <div id="plot"></div>
     </div>
         
@@ -77,6 +78,10 @@
             </thead>
             <tbody></tbody>
         </table>
+    </div>
+
+    <div class="center-button" id="savePdfButton" style="display: none;">
+        <button onclick="generatePDF()">📄 Save as PDF</button>
     </div>
 
     <footer>
