@@ -159,6 +159,10 @@ function validateDecimal(input, minValue, maxValue, n_decimals) {
     }
 }
 
+function formatNumberWithCommas(number) {
+    return number.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+}
+
 // Update performance table
 function updatePerformanceTable(stockReturns, years) {
     let tableBody = document.querySelector("#performanceTable tbody");
@@ -182,7 +186,7 @@ function updatePerformanceTable(stockReturns, years) {
         let avgTop10 = finalValues.slice(top10Index).reduce((a, b) => a + b, 0) / (finalValues.length - top10Index);
         let avgBottom10 = finalValues.slice(0, bottom10Index).reduce((a, b) => a + b, 0) / bottom10Index;
 
-        let row = `<tr><td>${year}</td><td>€${Math.round(avgTop10)}</td><td>€${Math.round(avgBottom10)}</td></tr>`;
+        let row = `<tr><td>${year}</td><td>€${formatNumberWithCommas(Math.round(avgTop10))}</td><td>€${formatNumberWithCommas(Math.round(avgBottom10))}</td></tr>`;
         tableBody.innerHTML += row;
 
         if (year === currentYear + years - 1) {
@@ -194,12 +198,11 @@ function updatePerformanceTable(stockReturns, years) {
 }
 
 function updateTotalReturns(lastAvgTop10, lastAvgBottom10) {
-   
     let returnsContainer = document.getElementById("returnsContainer");
     returnsContainer.innerHTML = `
         <h2>📈 Total Returns</h2>
-        <p>Optimistic Scenarios 10% Avg Return: €${Math.round(lastAvgTop10)}</p>
-        <p>Pessimistic Scenarios 10% Avg Return: €${Math.round(lastAvgBottom10)}</p>
+        <p>Optimistic Scenarios 10% Avg Return: €${formatNumberWithCommas(Math.round(lastAvgTop10))}</p>
+        <p>Pessimistic Scenarios 10% Avg Return: €${formatNumberWithCommas(Math.round(lastAvgBottom10))}</p>
     `;
 }
 
