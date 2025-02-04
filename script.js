@@ -44,8 +44,8 @@ function simulate() {
     let numStocks = getValidNumber("numStocks", 10);
     let T = parseFloat(document.getElementById("timePeriod").value);
     let S0 = parseFloat(document.getElementById("initialPrice").value);
-    let mu = parseFloat(document.getElementById("mu").value);
-    let sigma = parseFloat(document.getElementById("sigma").value);
+    let mu = parseFloat(document.getElementById("mu").value/100);
+    let sigma = parseFloat(document.getElementById("sigma").value/100);
     let deposit = parseFloat(document.getElementById("depositAmount").value);
     let depositFreq = document.getElementById("depositFrequency").value;
 
@@ -70,9 +70,9 @@ function simulate() {
     }
 
     let layout = {
-        title: "Simulated Stock Prices Over Time",
+        title: "Simulated Portfolio Price Over Time",
         xaxis: { title: "Date", type: "date" },
-        yaxis: { title: "Stock Price" },
+        yaxis: { title: "Portfolio Price" },
         showlegend: false,
         template: document.body.classList.contains("dark-mode") ? "plotly_dark" : "plotly_white"
     };
@@ -109,20 +109,41 @@ function showLoading(state) {
     plotDiv.innerHTML = state ? "<p>🔄 Running simulation...</p>" : "";
 }
 
+function validateInteger(input, minValue, maxValue) {
+    let value = parseInt(input.value);
+    if (isNaN(value) || value < minValue) {
+        input.value = minValue;
+    } else if (value > maxValue) {
+        input.value = maxValue;
+    } else {
+        input.value = Math.floor(value); // Ensure the value is an integer
+    }
+}
+
+function validateDecimal(input, minValue, maxValue, n_decimals) {
+    let value = parseFloat(input.value);
+    if (isNaN(value) || value < minValue) {
+        input.value = minValue.toFixed(1);
+    } else if (value > maxValue) {
+        input.value = maxValue.toFixed(1);
+    } else {
+        input.value = value.toFixed(n_decimals); // Ensure the value has one decimal place
+    }
+}
 
 // Update performance table
 function updatePerformanceTable(stockReturns, years) {
     let tableBody = document.querySelector("#performanceTable tbody");
     tableBody.innerHTML = ""; // Clear table
 
-    let yearlySteps = Math.round(stockReturns[0].length / years);
+    let yearlySteps = Math.floor(stockReturns[0].length / years);
     
     // Get the current year
     let currentYear = new Date().getFullYear();
     let lastAvgTop10, lastAvgBottom10;
     
     for (let year = currentYear; year < currentYear + years; year++) {
-        let yearIndex = Math.min((year - currentYear) * yearlySteps, stockReturns[0].length - 1);
+        let yearIndex = Math.min((year - currentYear + 1) * yearlySteps - 1, stockReturns[0].length - 1);
         
         let finalValues = stockReturns.map(path => path[yearIndex]);
         finalValues.sort((a, b) => a - b);
@@ -149,8 +170,8 @@ function updateTotalReturns(lastAvgTop10, lastAvgBottom10) {
     let returnsContainer = document.getElementById("returnsContainer");
     returnsContainer.innerHTML = `
         <h2>📈 Total Returns</h2>
-        <p>Top 10% Avg Return: €${Math.round(lastAvgTop10)}</p>
-        <p>Worst 10% Avg Return: €${Math.round(lastAvgBottom10)}</p>
+        <p>Optimistic Scenarios 10% Avg Return: €${Math.round(lastAvgTop10)}</p>
+        <p>Pessimistic Scenarios 10% Avg Return: €${Math.round(lastAvgBottom10)}</p>
     `;
 }
 

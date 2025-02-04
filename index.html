@@ -16,10 +16,10 @@
         </header>
 
     <div class="controls">
-        <label>📈 Number of Simulations: <input type="number" id="numStocks" value="10" min="1" max="100"></label>
-        <label>⏳ Time Period (Years): <input type="number" id="timePeriod" value="20" min="1" max="50"></label>
-        <label>💵 Initial Portfolio Price: <input type="number" id="initialPrice" value="1000" min="0" step="1000"></label>
-        <label>💰 Additional Deposit: <input type="number" id="depositAmount" value="50" min="0" step="50"></label>
+        <label>📈 Number of Simulations: <input type="number" id="numStocks" value="10" min="1" max="500" oninput="validateInteger(this, 1, 500)"></label>
+        <label>⏳ Time Period (Years): <input type="number" id="timePeriod" value="20" min="1" max="150" oninput="validateInteger(this, 1, 150)"></label>
+        <label>💵 Initial Portfolio Price: <input type="number" id="initialPrice" value="1000" min="0" step="1000" oninput="validateInteger(this, 0, Infinity)"></label>
+        <label>💰 Additional Deposit: <input type="number" id="depositAmount" value="50" min="0" step="50" oninput="validateInteger(this, 0, Infinity)"></label>
         <label>📅 Deposit Frequency:
             <select id="depositFrequency">
                 <option value="daily">Daily</option>
@@ -29,8 +29,8 @@
         </label>
     </div>
     <div class="controls">
-        <label>📊 Expected Return: <input type="number" id="mu" value="0.12" step="0.01"></label>
-        <label>📉 Volatility: <input type="number" id="sigma" value="0.15" step="0.01"></label>
+        <label>📊 Expected Return: <input type="number" id="mu" value="12.0" step="0.5" min="0" oninput="validateDecimal(this, 0, Infinity, 1)"></label>
+        <label>📉 Volatility: <input type="number" id="sigma" value="15.0" step="0.5" min="0" oninput="validateDecimal(this, 0, Infinity, 1)"></label>
         <div class="center-button">
             <button onclick="simulate()">🔄 Run Simulation</button>
         </div>
@@ -50,8 +50,8 @@
             <thead>
                 <tr>
                     <th>Year</th>
-                    <th>Top 10% Avg Return (€)</th>
-                    <th>Worst 10% Avg Return (€)</th>
+                    <th>Optimistic Scenarios 10% Avg Return (€)</th>
+                    <th>Pessimistic Scenarios 10% Avg Return (€)</th>
                 </tr>
             </thead>
             <tbody></tbody>
