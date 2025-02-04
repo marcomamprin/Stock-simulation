@@ -13,6 +13,32 @@ if (localStorage.getItem("darkMode") === "true") {
     document.body.classList.add("dark-mode");
 }
 
+const indexData = {
+    "S&P500": { mu: 10.0, sigma: 15.0 },
+    "NASDAQ": { mu: 12.0, sigma: 20.0 },
+    "DOWJONES": { mu: 8.0, sigma: 12.0 },
+    "FTSE100": { mu: 7.0, sigma: 10.0 },
+    "DAX": { mu: 9.0, sigma: 14.0 },
+    "CAC40": { mu: 8.0, sigma: 13.0 },
+    "NIKKEI225": { mu: 6.0, sigma: 18.0 },
+    "SSE": { mu: 5.0, sigma: 20.0 },
+    "US10Y": { mu: 2.0, sigma: 5.0 },
+    "EU10Y": { mu: 1.5, sigma: 4.0 },
+    "JP10Y": { mu: 0.5, sigma: 3.0 }
+};
+
+document.getElementById("indexSelect").addEventListener("change", function () {
+    let selectedIndex = this.value;
+    if (indexData[selectedIndex]) {
+        document.getElementById("mu").value = indexData[selectedIndex].mu.toFixed(1);
+        document.getElementById("sigma").value = indexData[selectedIndex].sigma.toFixed(1);
+        document.getElementById("mu").disabled = true;
+        document.getElementById("sigma").disabled = true;
+    } else {
+        document.getElementById("mu").disabled = false;
+        document.getElementById("sigma").disabled = false;
+    }
+});
 
 // Generate normally distributed random numbers
 function randomNormal() {
