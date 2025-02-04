@@ -65,36 +65,48 @@ function simulateStockPrices(S0, mu, sigma, N, dt, deposit, depositFreq) {
     return stockPrices;
 }
 
-// Generate stock paths and plot
-function simulate() {
-    let numStocks = getValidNumber("numStocks", 10);
-    let T = parseFloat(document.getElementById("timePeriod").value);
-    let S0 = parseFloat(document.getElementById("initialPrice").value);
-    let mu = parseFloat(document.getElementById("mu").value/100);
-    let sigma = parseFloat(document.getElementById("sigma").value/100);
-    let deposit = parseFloat(document.getElementById("depositAmount").value);
-    let depositFreq = document.getElementById("depositFrequency").value;
+// Get user inputs from the form
+function getUserInputs() {
+    return {
+        numStocks: getValidNumber("numStocks", 10),
+        T: parseFloat(document.getElementById("timePeriod").value),
+        S0: parseFloat(document.getElementById("initialPrice").value),
+        mu: parseFloat(document.getElementById("mu").value) / 100,
+        sigma: parseFloat(document.getElementById("sigma").value) / 100,
+        deposit: parseFloat(document.getElementById("depositAmount").value),
+        depositFreq: document.getElementById("depositFrequency").value
+    };
+}
 
+// Generate dates for market simulation
+function generateMarketDates(N) {
+    let today = new Date();
+    return Array.from({ length: N }, (_, i) => {
+        let d = new Date(today);
+        d.setDate(d.getDate() + i);
+        return d.toISOString().split('T')[0];
+    });
+}
+
+// Simulate stock prices and update UI
+function simulate() {
+    let { numStocks, T, S0, mu, sigma, deposit, depositFreq } = getUserInputs();
     let dt = 1 / 252;
     let N = Math.round(T / dt);
     let traces = [];
     let stockReturns = [];
-
-    let today = new Date();
-
+    
     for (let i = 0; i < numStocks; i++) {
         let stockPath = simulateStockPrices(S0, mu, sigma, N, dt, deposit, depositFreq);
         stockReturns.push(stockPath);
-
-        let dates = Array.from({ length: N }, (_, i) => {
-            let d = new Date(today);
-            d.setDate(d.getDate() + i);
-            return d.toISOString().split('T')[0];
-        });
-
-        traces.push({ x: dates, y: stockPath, type: "scatter", mode: "lines", line: { width: 1 }, opacity: numStocks > 20 ? 0.2 : 0.5 });
+        traces.push({ x: generateMarketDates(N), y: stockPath, type: "scatter", mode: "lines", line: { width: 1 }, opacity: numStocks > 20 ? 0.2 : 0.5 });
     }
 
+    updateUI(stockReturns, traces, T);
+}
+
+// Update UI elements and plot results
+function updateUI(stockReturns, traces, T) {
     let layout = {
         title: "Simulated Portfolio Price Over Time",
         xaxis: { title: "Date", type: "date" },
@@ -102,28 +114,18 @@ function simulate() {
         showlegend: false,
         template: document.body.classList.contains("dark-mode") ? "plotly_dark" : "plotly_white"
     };
-
+    
     let { lastAvgTop10, lastAvgBottom10 } = updatePerformanceTable(stockReturns, T);
     updateTotalReturns(lastAvgTop10, lastAvgBottom10);
-
-    let performanceTableContainer = document.getElementById("performanceTableContainer");
-    performanceTableContainer.style.display = "block";
     
-    let returnsContainer = document.getElementById("returnsContainer");
-    returnsContainer.style.display = "block";
-
-    let plotContainer = document.getElementById("plotContainer");
-    plotContainer.style.display = "block"; // Show the plot container
-    
-    // Ensure the plot element is also displayed
-    let plotElement = document.getElementById("plot");
-    plotElement.style.display = "block"; // Show the plot element
-
+    document.getElementById("performanceTableContainer").style.display = "block";
+    document.getElementById("returnsContainer").style.display = "block";
+    document.getElementById("plotContainer").style.display = "block";
+    document.getElementById("plot").style.display = "block";
 
     Plotly.newPlot("plot", traces, layout);
-
-
 }
+
 
 function getValidNumber(id, defaultValue) {
     let value = parseFloat(document.getElementById(id).value);
@@ -157,6 +159,10 @@ function validateDecimal(input, minValue, maxValue, n_decimals) {
     }
 }
 
+function formatNumberWithCommas(number) {
+    return number.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+}
+
 // Update performance table
 function updatePerformanceTable(stockReturns, years) {
     let tableBody = document.querySelector("#performanceTable tbody");
@@ -180,7 +186,7 @@ function updatePerformanceTable(stockReturns, years) {
         let avgTop10 = finalValues.slice(top10Index).reduce((a, b) => a + b, 0) / (finalValues.length - top10Index);
         let avgBottom10 = finalValues.slice(0, bottom10Index).reduce((a, b) => a + b, 0) / bottom10Index;
 
-        let row = `<tr><td>${year}</td><td>€${Math.round(avgTop10)}</td><td>€${Math.round(avgBottom10)}</td></tr>`;
+        let row = `<tr><td>${year}</td><td>€${formatNumberWithCommas(Math.round(avgTop10))}</td><td>€${formatNumberWithCommas(Math.round(avgBottom10))}</td></tr>`;
         tableBody.innerHTML += row;
 
         if (year === currentYear + years - 1) {
@@ -192,12 +198,11 @@ function updatePerformanceTable(stockReturns, years) {
 }
 
 function updateTotalReturns(lastAvgTop10, lastAvgBottom10) {
-   
     let returnsContainer = document.getElementById("returnsContainer");
     returnsContainer.innerHTML = `
         <h2>📈 Total Returns</h2>
-        <p>Optimistic Scenarios 10% Avg Return: €${Math.round(lastAvgTop10)}</p>
-        <p>Pessimistic Scenarios 10% Avg Return: €${Math.round(lastAvgBottom10)}</p>
+        <p>Optimistic Scenarios 10% Avg Return: €${formatNumberWithCommas(Math.round(lastAvgTop10))}</p>
+        <p>Pessimistic Scenarios 10% Avg Return: €${formatNumberWithCommas(Math.round(lastAvgBottom10))}</p>
     `;
 }
 
