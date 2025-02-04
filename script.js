@@ -40,6 +40,7 @@ const indexData = {
 
 document.getElementById("indexSelect").addEventListener("change", function () {
     let selectedIndex = this.value;
+    console.log("Selected index:", selectedIndex); // Debug line to check the selected value
     if (indexData[selectedIndex]) {
         document.getElementById("mu").value = indexData[selectedIndex].mu.toFixed(1);
         document.getElementById("sigma").value = indexData[selectedIndex].sigma.toFixed(1);
