@@ -204,7 +204,8 @@ input {
 }
 
 .dark-mode .controls {
-    background: #333;
+    border-color: #555;
+    background: #222;
     color: white;
 }
 
