@@ -13,14 +13,19 @@
     <div class="container">
         <header>
             <h1>Portfolio Management Tool</h1>
-            <button id="darkModeToggle">🌙 Dark Mode</button>
+            <div>
+                <button id="darkModeToggle">🌙 Dark Mode</button>
+                <!-- <button id="currencyToggle" class="currency-toggle">€</button> -->
+            </div>
         </header>
 
     <div class="controls">
-        <label>📈 Number of Simulations: <input type="number" id="numStocks" value="10" min="1" max="500" oninput="validateInteger(this, 1, 500)"></label>
+        <label>📈 Number of Simulations: <input type="number" id="numStocks" value="100" min="10" max="500" oninput="validateInteger(this, 100, 500)"></label>
         <label>⏳ Time Period (Years): <input type="number" id="timePeriod" value="20" min="1" max="150" oninput="validateInteger(this, 1, 150)"></label>
-        <label>💵 Initial Portfolio Price: <input type="number" id="initialPrice" value="1000" min="0" step="1000" oninput="validateInteger(this, 0, Infinity)"></label>
-        <label>💰 Additional Deposit: <input type="number" id="depositAmount" value="50" min="0" step="50" oninput="validateInteger(this, 0, Infinity)"></label>
+        <label>💵 Initial Portfolio Price: <span class="currency-symbol">€</span>
+            <input type="number" id="initialPrice" value="1000" min="0" step="1000" oninput="validateInteger(this, 1, Infinity)">
+        </label>
+        <label>💰 Additional Deposit: <span class="currency-symbol">€</span><input type="number" id="depositAmount" value="50" min="0" step="50" oninput="validateInteger(this, 0, Infinity)"></label>
         <label>📅 Deposit Frequency:
             <select id="depositFrequency">
                 <option value="daily">Daily</option>
@@ -46,8 +51,17 @@
                 <option value="JP10Y">Japan 10-Year Bond</option>
             </select>
         </label>
-        <label>📊 Expected Return: <input type="number" id="mu" value="12.0" step="0.5" min="0" oninput="validateDecimal(this, 0, Infinity, 1)"></label>
-        <label>📉 Volatility: <input type="number" id="sigma" value="15.0" step="0.5" min="0" oninput="validateDecimal(this, 0, Infinity, 1)"></label>
+        <label>📊 Expected Return: <input type="number" id="mu" value="12.0" step="0.5" min="0" oninput="validateDecimal(this, 0, Infinity, 1)">%</label>
+        <label>📉 Volatility: <input type="number" id="sigma" value="15.0" step="0.5" min="0" oninput="validateDecimal(this, 0, Infinity, 1)">%</label>
+        <label>📈 Select Model:
+            <select id="modelSelect" class="model-select">
+                <option value="GBM">Geometric Brownian Motion (GBM)</option>
+                <option value="Heston">Heston Stochastic Volatility Model</option>
+                <option value="JumpDiffusion">Jump-Diffusion Model (Merton's Model)</option>
+                <option value="MonteCarlo">Monte Carlo Simulation for Portfolio Risk</option>
+                <option value="FamaFrench">Fama-French Factor Model</option>
+            </select>
+        </label>
         <div class="center-button">
             <button onclick="simulate()">🔄 Run Simulation</button>
         </div>
@@ -67,13 +81,9 @@
             <thead>
                 <tr>
                     <th>Year</th>
-                    <th class="tooltip">Optimistic Scenario 10%
-                    </th>
-                    <th class="tooltip highlight">Average Scenario
-                    </th>
-                    <th class="tooltip">Pessimistic Scenario 10%
-
-                    </th>
+                    <th class="tooltip">Optimistic Scenario 10%</th>
+                    <th class="tooltip highlight">Average Scenario</th>
+                    <th class="tooltip">Pessimistic Scenario 10%</th>
                 </tr>
             </thead>
             <tbody></tbody>
@@ -88,5 +98,6 @@
         <p>&copy; 2025 Marco Mamprin. All rights reserved.</p>
         <p>This tool is intended for educational and informational purposes only. It does not provide financial, investment, or legal advice. The simulations and data presented are based on mathematical models and historical assumptions, which do not guarantee future performance. Users should conduct their own research and consult with a professional before making any financial or investment decisions. The creators of this tool are not responsible for any losses incurred from its use.</p>
     </footer>
+    </div>
 </body>
 </html>

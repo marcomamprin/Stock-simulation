@@ -58,8 +58,8 @@ function randomNormal() {
     return Math.sqrt(-2.0 * Math.log(u)) * Math.cos(2.0 * Math.PI * v);
 }
 
-// Simulate stock prices with deposits
-function simulateStockPrices(S0, mu, sigma, N, dt, deposit, depositFreq) {
+// Simulate stock prices with deposits using Geometric Brownian Motion (GBM)
+function simulateStockPricesGBM(S0, mu, sigma, N, dt, deposit, depositFreq) {
     if (S0 <= 0 || sigma < 0 || N <= 0 || dt <= 0 || deposit < 0) {
         throw new Error("Invalid input parameters for stock simulation.");
     }
@@ -81,6 +81,75 @@ function simulateStockPrices(S0, mu, sigma, N, dt, deposit, depositFreq) {
     return stockPrices;
 }
 
+function simulateStockPricesHeston(S0, mu, sigma, N, dt, deposit, depositFreq) {
+    let S = new Array(N).fill(0);
+    S[0] = S0;
+    let v = sigma * sigma;
+    let kappa = 2.0, theta = sigma * sigma, eta = 0.3;
+
+    for (let i = 1; i < N; i++) {
+        let dW1 = Math.sqrt(dt) * normalRandom();
+        let dW2 = Math.sqrt(dt) * normalRandom();
+        v = Math.max(0, v + kappa * (theta - v) * dt + eta * Math.sqrt(v) * dW2);
+        S[i] = S[i - 1] * Math.exp((mu - 0.5 * v) * dt + Math.sqrt(v) * dW1);
+        if (i % depositFreq === 0) S[i] += deposit;
+    }
+    return S;
+}
+
+function simulateStockPricesJumpDiffusion(S0, mu, sigma, N, dt, deposit, depositFreq) {
+    let S = new Array(N).fill(0);
+    S[0] = S0;
+    let lambda = 0.1, jumpMean = 0.02, jumpStd = 0.05;
+
+    for (let i = 1; i < N; i++) {
+        let dW = Math.sqrt(dt) * normalRandom();
+        let J = (Math.random() < lambda * dt) ? Math.exp(jumpMean + jumpStd * normalRandom()) : 1;
+        S[i] = S[i - 1] * J * Math.exp((mu - 0.5 * sigma * sigma) * dt + sigma * dW);
+        if (i % depositFreq === 0) S[i] += deposit;
+    }
+    return S;
+}
+
+function simulateStockPricesMonteCarlo(S0, mu, sigma, N, dt, deposit, depositFreq) {
+    let S = new Array(N).fill(0);
+    S[0] = S0;
+
+    for (let i = 1; i < N; i++) {
+        let dW = Math.sqrt(dt) * normalRandom();
+        S[i] = S[i - 1] * Math.exp((mu - 0.5 * sigma * sigma) * dt + sigma * dW);
+        if (i % depositFreq === 0) S[i] += deposit;
+    }
+    return S;
+}
+
+function simulateStockPricesFamaFrench(S0, mu, sigma, N, dt, deposit, depositFreq) {
+    let S = new Array(N).fill(0);
+    S[0] = S0;
+    let SMB = 0.03 * dt;  // Adjusting for the time step
+    let HML = 0.02 * dt;  // Adjusting for the time step
+    let betaSMB = 0.5;  // More reasonable coefficients
+    let betaHML = 0.3;
+
+    for (let i = 1; i < N; i++) {
+        let dW = Math.sqrt(dt) * normalRandom();
+        let famaFrenchFactor = betaSMB * SMB + betaHML * HML;
+        
+        S[i] = S[i - 1] * Math.exp((mu - 0.5 * sigma * sigma + famaFrenchFactor) * dt + sigma * dW);
+        if (i % depositFreq === 0) S[i] += deposit;
+    }
+    return S;
+}
+
+
+// Helper function to generate standard normal random numbers using Box-Muller Transform
+function normalRandom() {
+    let u = Math.random() || 1e-10;
+    let v = Math.random() || 1e-10;
+    return Math.sqrt(-2.0 * Math.log(u)) * Math.cos(2.0 * Math.PI * v);
+}
+
+
 // Get user inputs from the form
 function getUserInputs() {
     try {
@@ -91,11 +160,12 @@ function getUserInputs() {
         let sigma = parseFloat(document.getElementById("sigma").value) / 100;
         let deposit = parseFloat(document.getElementById("depositAmount").value);
         let depositFreq = document.getElementById("depositFrequency").value;
+        let model = document.getElementById("modelSelect").value;
 
         if (isNaN(T) || isNaN(S0) || isNaN(mu) || isNaN(sigma) || isNaN(deposit)) {
             throw new Error("Invalid input values. Please check your inputs.");
         }
-        return { numStocks, T, S0, mu, sigma, deposit, depositFreq };
+        return { numStocks, T, S0, mu, sigma, deposit, depositFreq, model };
     } catch (error) {
         alert(error.message);
         throw error;
@@ -114,14 +184,32 @@ function generateMarketDates(N) {
 
 // Simulate stock prices and update UI
 async function simulate() {
-    let { numStocks, T, S0, mu, sigma, deposit, depositFreq } = getUserInputs();
+    let { numStocks, T, S0, mu, sigma, deposit, depositFreq, model } = getUserInputs();
     let dt = 1 / 252;
     let N = Math.round(T / dt);
     let traces = [];
     let stockReturns = [];
 
     await Promise.all(Array.from({ length: numStocks }, async () => {
-        let stockPath = simulateStockPrices(S0, mu, sigma, N, dt, deposit, depositFreq);
+        let stockPath;
+        try {
+            if (model === "GBM") {
+                stockPath = simulateStockPricesGBM(S0, mu, sigma, N, dt, deposit, depositFreq);
+            } else if (model === "Heston") {
+                stockPath = simulateStockPricesHeston(S0, mu, sigma, N, dt, deposit, depositFreq);
+            } else if (model === "JumpDiffusion") {
+                stockPath = simulateStockPricesJumpDiffusion(S0, mu, sigma, N, dt, deposit, depositFreq);
+            } else if (model === "MonteCarlo") {
+                stockPath = simulateStockPricesMonteCarlo(S0, mu, sigma, N, dt, deposit, depositFreq);
+            } else if (model === "FamaFrench") {
+                stockPath = simulateStockPricesFamaFrench(S0, mu, sigma, N, dt, deposit, depositFreq);
+            } else {
+                throw new Error("Selected model is not yet implemented.");
+            }
+        } catch (error) {
+            alert(error.message); // Show pop-up message with the error
+            throw error; // Re-throw the error to stop further execution
+        }
         stockReturns.push(stockPath);
         traces.push({ x: generateMarketDates(N), y: stockPath, type: "scatter", mode: "lines", line: { width: 1 }, opacity: numStocks > 20 ? 0.2 : 0.5 });
     }));
@@ -152,8 +240,8 @@ function updateUI(stockReturns, traces, T) {
 
 // Separate function for updating performance and UI elements
 function updatePerformanceAndUI(stockReturns, T) {
-    let { lastAvgTop10, lastAvgBottom10, lastMedian } = updatePerformanceTable(stockReturns, T);
-    updateTotalReturns(lastAvgTop10, lastAvgBottom10, lastMedian);
+    let { lastTop10, lastBottom10, lastMedian } = updatePerformanceTable(stockReturns, T);
+    updateTotalReturns(lastTop10, lastBottom10, lastMedian);
 
     document.getElementById("performanceTableContainer").style.display = "block";
     document.getElementById("totalPortfolioValueContainer").style.display = "block";
@@ -209,7 +297,7 @@ function updatePerformanceTable(stockReturns, years) {
     
     // Get the current year
     let currentYear = new Date().getFullYear();
-    let lastAvgTop10, lastAvgBottom10, lastMedian;
+    let lastTop10, lastBottom10, lastMedian;
     
     for (let year = currentYear; year < currentYear + years; year++) {
         let yearIndex = Math.min((year - currentYear + 1) * yearlySteps - 1, stockReturns[0].length - 1);
@@ -221,23 +309,23 @@ function updatePerformanceTable(stockReturns, years) {
         let bottom10Index = Math.floor(finalValues.length * 0.1);
         let medianIndex = Math.floor(finalValues.length / 2);
 
-        let avgTop10 = finalValues.slice(top10Index).reduce((a, b) => a + b, 0) / (finalValues.length - top10Index);
-        let avgBottom10 = finalValues.slice(0, bottom10Index).reduce((a, b) => a + b, 0) / bottom10Index;
+        let top10 = finalValues[top10Index];
+        let bottom10 = finalValues[bottom10Index];
         let median = finalValues.length % 2 === 0 ? (finalValues[medianIndex - 1] + finalValues[medianIndex]) / 2 : finalValues[medianIndex];
 
-        let row = `<tr><td>${year}</td><td>€${formatNumberWithCommas(Math.round(avgTop10))}</td><td>€${formatNumberWithCommas(Math.round(median))}</td><td>€${formatNumberWithCommas(Math.round(avgBottom10))}</td></tr>`;
+        let row = `<tr><td>${year}</td><td>€${formatNumberWithCommas(Math.round(top10))}</td><td>€${formatNumberWithCommas(Math.round(median))}</td><td>€${formatNumberWithCommas(Math.round(bottom10))}</td></tr>`;
         tableBody.innerHTML += row;
 
         if (year === currentYear + years - 1) {
-            lastAvgTop10 = avgTop10;
-            lastAvgBottom10 = avgBottom10;
+            lastTop10 = top10;
+            lastBottom10 = bottom10;
             lastMedian = median;
         }
     }
-    return { lastAvgTop10, lastAvgBottom10, lastMedian };
+    return { lastTop10, lastBottom10, lastMedian };
 }
 
-function updateTotalReturns(lastAvgTop10, lastAvgBottom10, lastMedian) {
+function updateTotalReturns(lastTop10, lastBottom10, lastMedian) {
     let returnsContainer = document.getElementById("totalPortfolioValueContainer");
     returnsContainer.innerHTML = `
         <h2 style="text-align: center;">📈 Total Portfolio Value</h2>
@@ -248,7 +336,7 @@ function updateTotalReturns(lastAvgTop10, lastAvgBottom10, lastMedian) {
             </tr>
             <tr>
                 <td style="text-align: right; padding-right: 20px;" title="Best 10%">Optimistic Scenario</td>
-                <td style="text-align: right;">€${formatNumberWithCommas(Math.round(lastAvgTop10))}</td>
+                <td style="text-align: right;">€${formatNumberWithCommas(Math.round(lastTop10))}</td>
             </tr>
             <tr>
                 <td style="text-align: right; padding-right: 20px;" title="Computed as the median value">Average Scenario</td>
@@ -256,7 +344,7 @@ function updateTotalReturns(lastAvgTop10, lastAvgBottom10, lastMedian) {
             </tr>
             <tr>
                 <td style="text-align: right; padding-right: 20px;" title="Worst 10%">Pessimistic Scenario</td>
-                <td style="text-align: right;">€${formatNumberWithCommas(Math.round(lastAvgBottom10))}</td>
+                <td style="text-align: right;">€${formatNumberWithCommas(Math.round(lastBottom10))}</td>
             </tr>
         </table>
     `;
@@ -273,8 +361,8 @@ function generatePDF() {
     doc.text(`Initial Portfolio Price: ${document.getElementById("initialPrice").value}`, 10, 25);
     doc.text(`Additional Deposit: ${document.getElementById("depositAmount").value}`, 10, 30);
     doc.text(`Deposit Frequency: ${document.getElementById("depositFrequency").value}`, 10, 35);
-    doc.text(`Expected Return: ${document.getElementById("mu").value}`, 10, 40);
-    doc.text(`Volatility: ${document.getElementById("sigma").value}`, 10, 45);
+    doc.text(`Expected Return: ${document.getElementById("mu").value}%`, 10, 40);
+    doc.text(`Volatility: ${document.getElementById("sigma").value}%`, 10, 45);
 
     doc.text("Total Portfolio Value:", 10, 100);
     const plotElement = document.getElementById("plot").getElementsByTagName("canvas")[0];
@@ -304,13 +392,27 @@ function generatePDF() {
 
     const now = new Date();
     const fileName = `portfolio_management_tool_${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}_${String(now.getHours()).padStart(2, '0')}-${String(now.getMinutes()).padStart(2, '0')}-${String(now.getSeconds()).padStart(2, '0')}.pdf`;
-    doc.save(fileName);
+    const pdfData = doc.output('bloburl');
+    window.open(pdfData, '_blank'); // Open the PDF in a new page
 }
-
-
 
 // Run on load
 document.getElementById("plotContainer").style.display = "none"; // Hide the plot container initially
 document.getElementById("performanceTableContainer").style.display = "none"; // Hide the plot container initially
 document.getElementById("returnsContainer").style.display = "none"; // Hide the returns container initially
 document.getElementById("savePdfButton").style.display = "none"; // Hide the Save as PDF button initially
+
+function formatCurrencyInput(input) {
+    let value = input.value.replace(/,/g, '');
+    if (!isNaN(value) && value !== '') {
+        input.value = parseFloat(value).toLocaleString();
+    }
+}
+
+function removeCommas(input) {
+    input.value = input.value.replace(/,/g, '');
+}
+
+function addCommas(input) {
+    formatCurrencyInput(input);
+}
