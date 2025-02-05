@@ -58,29 +58,35 @@ function randomNormal() {
     return Math.sqrt(-2.0 * Math.log(u)) * Math.cos(2.0 * Math.PI * v);
 }
 
-// Simulate stock prices with deposits using Geometric Brownian Motion (GBM)
+// Modify the deposit handling for all models
+function applyDeposit(i, deposit, depositFreq) {
+    let depositInterval = depositFreq === "daily" ? 1 : depositFreq === "monthly" ? 21 : 252; // Convert to daily steps
+    if (i % depositInterval === 0) {
+        return deposit;
+    }
+    return 0;
+}
+
+// GBM Model
 function simulateStockPricesGBM(S0, mu, sigma, N, dt, deposit, depositFreq) {
     if (S0 <= 0 || sigma < 0 || N <= 0 || dt <= 0 || deposit < 0) {
         throw new Error("Invalid input parameters for stock simulation.");
     }
 
     let stockPrices = [S0];
-    let depositInterval = depositFreq === "daily" ? 1 : depositFreq === "monthly" ? 21 : 252; // Convert to daily steps
 
     for (let i = 1; i < N; i++) {
         let dW = Math.sqrt(dt) * randomNormal();
         let logReturn = (mu - 0.5 * sigma ** 2) * dt + sigma * dW;
         let newPrice = stockPrices[i - 1] * Math.exp(logReturn);
 
-        if (i % depositInterval === 0) {
-            newPrice += deposit;
-        }
-
+        newPrice += applyDeposit(i, deposit, depositFreq); // Apply deposit here
         stockPrices.push(newPrice);
     }
     return stockPrices;
 }
 
+// Heston Model
 function simulateStockPricesHeston(S0, mu, sigma, N, dt, deposit, depositFreq) {
     let S = new Array(N).fill(0);
     S[0] = S0;
@@ -92,11 +98,13 @@ function simulateStockPricesHeston(S0, mu, sigma, N, dt, deposit, depositFreq) {
         let dW2 = Math.sqrt(dt) * normalRandom();
         v = Math.max(0, v + kappa * (theta - v) * dt + eta * Math.sqrt(v) * dW2);
         S[i] = S[i - 1] * Math.exp((mu - 0.5 * v) * dt + Math.sqrt(v) * dW1);
-        if (i % depositFreq === 0) S[i] += deposit;
+        
+        S[i] += applyDeposit(i, deposit, depositFreq); // Apply deposit here
     }
     return S;
 }
 
+// Jump Diffusion Model
 function simulateStockPricesJumpDiffusion(S0, mu, sigma, N, dt, deposit, depositFreq) {
     let S = new Array(N).fill(0);
     S[0] = S0;
@@ -106,11 +114,13 @@ function simulateStockPricesJumpDiffusion(S0, mu, sigma, N, dt, deposit, deposit
         let dW = Math.sqrt(dt) * normalRandom();
         let J = (Math.random() < lambda * dt) ? Math.exp(jumpMean + jumpStd * normalRandom()) : 1;
         S[i] = S[i - 1] * J * Math.exp((mu - 0.5 * sigma * sigma) * dt + sigma * dW);
-        if (i % depositFreq === 0) S[i] += deposit;
+        
+        S[i] += applyDeposit(i, deposit, depositFreq); // Apply deposit here
     }
     return S;
 }
 
+// Monte Carlo Model
 function simulateStockPricesMonteCarlo(S0, mu, sigma, N, dt, deposit, depositFreq) {
     let S = new Array(N).fill(0);
     S[0] = S0;
@@ -118,11 +128,13 @@ function simulateStockPricesMonteCarlo(S0, mu, sigma, N, dt, deposit, depositFre
     for (let i = 1; i < N; i++) {
         let dW = Math.sqrt(dt) * normalRandom();
         S[i] = S[i - 1] * Math.exp((mu - 0.5 * sigma * sigma) * dt + sigma * dW);
-        if (i % depositFreq === 0) S[i] += deposit;
+        
+        S[i] += applyDeposit(i, deposit, depositFreq); // Apply deposit here
     }
     return S;
 }
 
+// Fama-French Model
 function simulateStockPricesFamaFrench(S0, mu, sigma, N, dt, deposit, depositFreq) {
     let S = new Array(N).fill(0);
     S[0] = S0;
@@ -136,7 +148,8 @@ function simulateStockPricesFamaFrench(S0, mu, sigma, N, dt, deposit, depositFre
         let famaFrenchFactor = betaSMB * SMB + betaHML * HML;
         
         S[i] = S[i - 1] * Math.exp((mu - 0.5 * sigma * sigma + famaFrenchFactor) * dt + sigma * dW);
-        if (i % depositFreq === 0) S[i] += deposit;
+        
+        S[i] += applyDeposit(i, deposit, depositFreq); // Apply deposit here
     }
     return S;
 }
