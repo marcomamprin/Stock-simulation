@@ -238,11 +238,24 @@ function updateUI(stockReturns, traces, T) {
     let lowerCI = percentilesData.map(p => p[0]); // 10th percentile
     let upperCI = percentilesData.map(p => p[2]); // 90th percentile
 
+    // Calculate the contribution trend
+    let { S0, deposit, depositFreq } = getUserInputs();
+    let contributionTrend = [S0];
+    let depositInterval = depositFreq === "daily" ? 1 : depositFreq === "monthly" ? 21 : 252;
+    for (let i = 1; i < stockReturns[0].length; i++) {
+        let lastValue = contributionTrend[i - 1];
+        if (i % depositInterval === 0) {
+            lastValue += deposit;
+        }
+        contributionTrend.push(lastValue);
+    }
+
     // Update the trace with median and confidence intervals
     traces = [
         { x: generateMarketDates(stockReturns[0].length), y: median, type: "scatter", mode: "lines", line: { width: 3, color: 'blue' }, name: 'Median' },
         { x: generateMarketDates(stockReturns[0].length), y: lowerCI, type: "scatter", mode: "lines", fill: "tonexty", line: { color: 'rgba(0,0,255,0.2)' }, name: '10th Percentile' },
-        { x: generateMarketDates(stockReturns[0].length), y: upperCI, type: "scatter", mode: "lines", fill: "tonexty", line: { color: 'rgba(0,0,255,0.2)' }, name: '90th Percentile' }
+        { x: generateMarketDates(stockReturns[0].length), y: upperCI, type: "scatter", mode: "lines", fill: "tonexty", line: { color: 'rgba(0,0,255,0.2)' }, name: '90th Percentile' },
+        { x: generateMarketDates(stockReturns[0].length), y: contributionTrend, type: "scatter", mode: "lines", line: { width: 2, color: 'green', dash: 'dash' }, name: 'Contribution Trend' }
     ];
 
     let layout = {
@@ -455,3 +468,5 @@ function calculatePercentiles(stockReturns, percentiles = [10, 50, 90]) {
     }
     return percentilesData;
 }
+
+
