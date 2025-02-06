@@ -233,11 +233,23 @@ async function simulate() {
 
 // Update UI elements and plot results
 function updateUI(stockReturns, traces, T) {
+    let percentilesData = calculatePercentiles(stockReturns);
+    let median = percentilesData.map(p => p[1]);  // 50th percentile (median)
+    let lowerCI = percentilesData.map(p => p[0]); // 10th percentile
+    let upperCI = percentilesData.map(p => p[2]); // 90th percentile
+
+    // Update the trace with median and confidence intervals
+    traces = [
+        { x: generateMarketDates(stockReturns[0].length), y: median, type: "scatter", mode: "lines", line: { width: 3, color: 'blue' }, name: 'Median' },
+        { x: generateMarketDates(stockReturns[0].length), y: lowerCI, type: "scatter", mode: "lines", fill: "tonexty", line: { color: 'rgba(0,0,255,0.2)' }, name: '10th Percentile' },
+        { x: generateMarketDates(stockReturns[0].length), y: upperCI, type: "scatter", mode: "lines", fill: "tonexty", line: { color: 'rgba(0,0,255,0.2)' }, name: '90th Percentile' }
+    ];
+
     let layout = {
         title: "Simulated Portfolio Price Over Time",
         xaxis: { title: "Date", type: "date" },
         yaxis: { title: "Portfolio Price" },
-        showlegend: false,
+        showlegend: true,
         template: document.body.classList.contains("dark-mode") ? "plotly_dark" : "plotly_white",
         paper_bgcolor: document.body.classList.contains("dark-mode") ? "#222" : "#fff",
         plot_bgcolor: document.body.classList.contains("dark-mode") ? "#222" : "#fff",
@@ -428,4 +440,18 @@ function removeCommas(input) {
 
 function addCommas(input) {
     formatCurrencyInput(input);
+}
+
+function calculatePercentiles(stockReturns, percentiles = [10, 50, 90]) {
+    let percentilesData = [];
+    for (let i = 0; i < stockReturns[0].length; i++) {
+        let valuesAtStep = stockReturns.map(path => path[i]);
+        valuesAtStep.sort((a, b) => a - b);
+        let percentileValues = percentiles.map(p => {
+            let index = Math.floor(valuesAtStep.length * p / 100);
+            return valuesAtStep[index];
+        });
+        percentilesData.push(percentileValues);
+    }
+    return percentilesData;
 }
