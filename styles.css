@@ -293,3 +293,29 @@ input {
 body, .controls, #plot, #performanceTable {
     transition: background 0.3s ease, color 0.3s ease;
 }
+
+/* Progress Bar Styling */
+.progress-container {
+    width: 100%;
+    max-width: 1200px;
+    margin: 20px auto;
+    display: none;
+    justify-content: center;
+    align-items: center;
+}
+
+.progress-bar {
+    width: 100%;
+    background-color: #f3f3f3;
+    border-radius: 25px;
+    overflow: hidden;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+}
+
+.progress-bar-fill {
+    height: 20px;
+    width: 0;
+    background-color: #007bff;
+    transition: width 0.3s;
+    border-radius: 25px;
+}

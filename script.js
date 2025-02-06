@@ -201,34 +201,42 @@ async function simulate() {
     let dt = 1 / 252;
     let N = Math.round(T / dt);
     let traces = [];
-    let stockReturns = [];
 
-    await Promise.all(Array.from({ length: numStocks }, async () => {
-        let stockPath;
-        try {
-            if (model === "GBM") {
-                stockPath = simulateStockPricesGBM(S0, mu, sigma, N, dt, deposit, depositFreq);
-            } else if (model === "Heston") {
-                stockPath = simulateStockPricesHeston(S0, mu, sigma, N, dt, deposit, depositFreq);
-            } else if (model === "JumpDiffusion") {
-                stockPath = simulateStockPricesJumpDiffusion(S0, mu, sigma, N, dt, deposit, depositFreq);
-            } else if (model === "MonteCarlo") {
-                stockPath = simulateStockPricesMonteCarlo(S0, mu, sigma, N, dt, deposit, depositFreq);
-            } else if (model === "FamaFrench") {
-                stockPath = simulateStockPricesFamaFrench(S0, mu, sigma, N, dt, deposit, depositFreq);
+    let progressContainer = document.getElementById("progressContainer");
+    let progressBarFill = document.getElementById("progressBarFill");
+    progressContainer.style.display = "flex";
+    progressBarFill.style.width = "0%";
+
+    // Hide existing plot and summary details
+    document.getElementById("plotContainer").style.display = "none";
+    document.getElementById("performanceTableContainer").style.display = "none";
+    document.getElementById("totalPortfolioValueContainer").style.display = "none";
+    document.getElementById("savePdfButton").style.display = "none";
+
+    let workerPromises = Array.from({ length: numStocks }, (_, index) => new Promise((resolve, reject) => {
+        let worker = new Worker("worker.js");
+        worker.postMessage({ S0, mu, sigma, N, dt, deposit, depositFreq, model });
+
+        worker.onmessage = function (event) {
+            if (event.data.success) {
+                resolve(event.data.stockPath);
+                progressBarFill.style.width = `${((index + 1) / numStocks) * 100}%`;
             } else {
-                throw new Error("Selected model is not yet implemented.");
+                reject(event.data.error);
             }
-        } catch (error) {
-            alert(error.message); // Show pop-up message with the error
-            throw error; // Re-throw the error to stop further execution
-        }
-        stockReturns.push(stockPath);
-        traces.push({ x: generateMarketDates(N), y: stockPath, type: "scatter", mode: "lines", line: { width: 1 }, opacity: numStocks > 20 ? 0.2 : 0.5 });
+            worker.terminate();
+        };
     }));
 
-    updateUI(stockReturns, traces, T);
-    document.getElementById("savePdfButton").style.display = "block"; // Show the Save as PDF button
+    try {
+        let stockReturns = await Promise.all(workerPromises);
+        updateUI(stockReturns, traces, T);
+        document.getElementById("savePdfButton").style.display = "block"; 
+    } catch (error) {
+        alert("Simulation failed: " + error);
+    } finally {
+        progressContainer.style.display = "none";
+    }
 }
 
 // Update UI elements and plot results
