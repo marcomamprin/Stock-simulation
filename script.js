@@ -196,39 +196,78 @@ function generateMarketDates(N) {
 }
 
 // Simulate stock prices and update UI
+const useMultiprocessing = false; // Flag to enable or disable multiprocessing
+
 async function simulate() {
     let { numStocks, T, S0, mu, sigma, deposit, depositFreq, model } = getUserInputs();
     let dt = 1 / 252;
     let N = Math.round(T / dt);
     let traces = [];
-    let stockReturns = [];
 
-    await Promise.all(Array.from({ length: numStocks }, async () => {
-        let stockPath;
-        try {
-            if (model === "GBM") {
-                stockPath = simulateStockPricesGBM(S0, mu, sigma, N, dt, deposit, depositFreq);
-            } else if (model === "Heston") {
-                stockPath = simulateStockPricesHeston(S0, mu, sigma, N, dt, deposit, depositFreq);
-            } else if (model === "JumpDiffusion") {
-                stockPath = simulateStockPricesJumpDiffusion(S0, mu, sigma, N, dt, deposit, depositFreq);
-            } else if (model === "MonteCarlo") {
-                stockPath = simulateStockPricesMonteCarlo(S0, mu, sigma, N, dt, deposit, depositFreq);
-            } else if (model === "FamaFrench") {
-                stockPath = simulateStockPricesFamaFrench(S0, mu, sigma, N, dt, deposit, depositFreq);
-            } else {
-                throw new Error("Selected model is not yet implemented.");
-            }
-        } catch (error) {
-            alert(error.message); // Show pop-up message with the error
-            throw error; // Re-throw the error to stop further execution
+    let progressContainer = document.getElementById("progressContainer");
+    let progressBarFill = document.getElementById("progressBarFill");
+    progressContainer.style.display = "flex";
+    progressBarFill.style.width = "0%";
+
+    // Hide existing plot and summary details
+    document.getElementById("plotContainer").style.display = "none";
+    document.getElementById("performanceTableContainer").style.display = "none";
+    document.getElementById("totalPortfolioValueContainer").style.display = "none";
+    document.getElementById("savePdfButton").style.display = "none";
+
+    let completed = 0;
+    let workerPromises;
+
+    if (useMultiprocessing) {
+        let simulationsPerWorker = Math.ceil(numStocks / navigator.hardwareConcurrency);
+        workerPromises = Array.from({ length: navigator.hardwareConcurrency }, (_, index) => new Promise((resolve, reject) => {
+            let worker = new Worker("worker.js");
+            worker.postMessage({ simulations: simulationsPerWorker, S0, mu, sigma, N, dt, deposit, depositFreq, model });
+
+            worker.onmessage = function (event) {
+                if (event.data.success) {
+                    resolve(event.data.results);
+                    completed += simulationsPerWorker;
+                    let progress = Math.min((completed / numStocks) * 100, 100);
+                    progressBarFill.style.width = `${progress}%`;
+                } else {
+                    reject(event.data.error);
+                }
+                worker.terminate();
+            };
+        }));
+    } else {
+        workerPromises = Array.from({ length: numStocks }, (_, index) => new Promise((resolve) => {
+            let worker = new Worker("worker.js");
+            worker.postMessage({ simulations: 1, S0, mu, sigma, N, dt, deposit, depositFreq, model });
+
+            worker.onmessage = function (event) {
+                if (event.data.success) {
+                    resolve(event.data.results[0]);
+                    completed++;
+                    let progress = Math.min((completed / numStocks) * 100, 100);
+                    progressBarFill.style.width = `${progress}%`;
+                }
+                worker.terminate();
+            };
+        }));
+    }
+
+    try {
+        let results = await Promise.all(workerPromises);
+        let stockReturns = useMultiprocessing ? results.flat() : results;
+        updateUI(stockReturns, traces, T);
+        document.getElementById("savePdfButton").style.display = "block"; 
+    } catch (error) {
+        alert("Simulation failed: " + error);
+    } finally {
+        if (!useMultiprocessing) {
+            progressBarFill.style.width = "100%"; // Ensure the progress bar reaches 100% for single processing
         }
-        stockReturns.push(stockPath);
-        traces.push({ x: generateMarketDates(N), y: stockPath, type: "scatter", mode: "lines", line: { width: 1 }, opacity: numStocks > 20 ? 0.2 : 0.5 });
-    }));
-
-    updateUI(stockReturns, traces, T);
-    document.getElementById("savePdfButton").style.display = "block"; // Show the Save as PDF button
+        setTimeout(() => {
+            progressContainer.style.display = "none";
+        }, 500); // Add a slight delay before hiding the progress bar
+    }
 }
 
 // Update UI elements and plot results
@@ -252,10 +291,10 @@ function updateUI(stockReturns, traces, T) {
 
     // Update the trace with median and confidence intervals
     traces = [
-        { x: generateMarketDates(stockReturns[0].length), y: median, type: "scatter", mode: "lines", line: { width: 3, color: 'blue' }, name: 'Median' },
-        { x: generateMarketDates(stockReturns[0].length), y: lowerCI, type: "scatter", mode: "lines", fill: "tonexty", line: { color: 'rgba(0,0,255,0.2)' }, name: '10th Percentile' },
-        { x: generateMarketDates(stockReturns[0].length), y: upperCI, type: "scatter", mode: "lines", fill: "tonexty", line: { color: 'rgba(0,0,255,0.2)' }, name: '90th Percentile' },
-        { x: generateMarketDates(stockReturns[0].length), y: contributionTrend, type: "scatter", mode: "lines", line: { width: 2, color: 'green', dash: 'dash' }, name: 'Contribution Trend' }
+        { x: generateMarketDates(stockReturns[0].length), y: median, type: "scatter", mode: "lines", line: { width: 3, color: 'blue' }, name: 'Average Scenario' },
+        { x: generateMarketDates(stockReturns[0].length), y: lowerCI, type: "scatter", mode: "lines", fill: "tonexty", line: { color: 'rgba(0,0,255,0.2)' }, name: 'Pessimistic Scenario' },
+        { x: generateMarketDates(stockReturns[0].length), y: upperCI, type: "scatter", mode: "lines", fill: "tonexty", line: { color: 'rgba(0,0,255,0.2)' }, name: 'Optimistic Scenario' },
+        { x: generateMarketDates(stockReturns[0].length), y: contributionTrend, type: "scatter", mode: "lines", line: { width: 2, color: 'green', dash: 'dot' }, name: 'Contribution Trend' }
     ];
 
     let layout = {
@@ -263,17 +302,20 @@ function updateUI(stockReturns, traces, T) {
         xaxis: { title: "Date", type: "date" },
         yaxis: { title: "Portfolio Price" },
         showlegend: true,
+        legend: { orientation: "h", y: -0.2 }, // Place legend at the bottom
         template: document.body.classList.contains("dark-mode") ? "plotly_dark" : "plotly_white",
         paper_bgcolor: document.body.classList.contains("dark-mode") ? "#222" : "#fff",
         plot_bgcolor: document.body.classList.contains("dark-mode") ? "#222" : "#fff",
         font: { color: document.body.classList.contains("dark-mode") ? "#f4f4f4" : "#333" },
         xaxis: { color: document.body.classList.contains("dark-mode") ? "#f4f4f4" : "#333" },
-        yaxis: { color: document.body.classList.contains("dark-mode") ? "#f4f4f4" : "#333" }
+        yaxis: { color: document.body.classList.contains("dark-mode") ? "#f4f4f4" : "#333" },
+        autosize: true, // Make the plot responsive
+        margin: { l: 40, r: 20, t: 40, b: 40 } // Adjust margins for better fit on small screens
     };
 
     updatePerformanceAndUI(stockReturns, T);
 
-    Plotly.newPlot("plot", traces, layout);
+    Plotly.newPlot("plot", traces, layout, { responsive: true });
 }
 
 // Separate function for updating performance and UI elements
@@ -388,51 +430,106 @@ function updateTotalReturns(lastTop10, lastBottom10, lastMedian) {
     `;
 }
 
+
 function generatePDF() {
     const { jsPDF } = window.jspdf;
     const doc = new jsPDF();
 
-    doc.setFontSize(8);
+    const now = new Date();
+    const dateString = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
+    const model = document.getElementById("modelSelect").value;
+    const modelDescription = {
+        "GBM": "Geometric Brownian Motion (GBM) is a mathematical model used to predict the future prices of financial instruments.",
+        "Heston": "Heston Stochastic Volatility Model is used to capture the stochastic volatility of financial instruments.",
+        "JumpDiffusion": "Jump-Diffusion Model (Merton's Model) incorporates sudden jumps in prices along with continuous price changes.",
+        "MonteCarlo": "Monte Carlo Simulation for Portfolio Risk uses random sampling to estimate the risk and return of a portfolio.",
+        "FamaFrench": "Fama-French Factor Model is used to describe stock returns through multiple factors including market risk, size, and value."
+    };
+
+    doc.setFontSize(14);
+    doc.setFont("helvetica", "bold");
     doc.text("Portfolio Management Tool", 10, 10);
-    doc.text(`Number of Simulations: ${document.getElementById("numStocks").value}`, 10, 15);
-    doc.text(`Time Period (Years): ${document.getElementById("timePeriod").value}`, 10, 20);
-    doc.text(`Initial Portfolio Price: ${document.getElementById("initialPrice").value}`, 10, 25);
-    doc.text(`Additional Deposit: ${document.getElementById("depositAmount").value}`, 10, 30);
-    doc.text(`Deposit Frequency: ${document.getElementById("depositFrequency").value}`, 10, 35);
-    doc.text(`Expected Return: ${document.getElementById("mu").value}%`, 10, 40);
-    doc.text(`Volatility: ${document.getElementById("sigma").value}%`, 10, 45);
+    doc.setFont("helvetica", "normal");
+    doc.setFontSize(10);
+    doc.text(`Date of Simulation: ${dateString}`, 10, 20);
+    doc.text(`Number of Simulations: ${document.getElementById("numStocks").value}`, 10, 25);
+    doc.text(`Time Period (Years): ${document.getElementById("timePeriod").value}`, 10, 30);
+    doc.text(`Initial Portfolio Price: ${document.getElementById("initialPrice").value}`, 10, 35);
+    doc.text(`Additional Deposit: ${document.getElementById("depositAmount").value}`, 10, 40);
+    doc.text(`Deposit Frequency: ${document.getElementById("depositFrequency").value}`, 10, 45);
+    doc.text(`Expected Return: ${document.getElementById("mu").value}%`, 10, 50);
+    doc.text(`Volatility: ${document.getElementById("sigma").value}%`, 10, 55);
+    doc.text(`Model Used: ${model}`, 10, 60);
 
-    doc.text("Total Portfolio Value:", 10, 100);
-    const plotElement = document.getElementById("plot").getElementsByTagName("canvas")[0];
-    if (plotElement) {
-        const plotImage = plotElement.toDataURL("image/png");
-        doc.addImage(plotImage, 'PNG', 10, 110, 180, 80);
-    }
-
-    doc.addPage();
-    doc.text("Performance Summary:", 10, 10);
-    const table = document.getElementById("performanceTable");
-    const rows = table.querySelectorAll("tr");
-    let y = 20;
-    rows.forEach(row => {
-        const cells = row.querySelectorAll("th, td");
-        let x = 10;
-        cells.forEach(cell => {
-            doc.text(cell.innerText, x, y);
-            x += 50;
-        });
-        y += 10;
-        if (y > 280) { // Add a new page if the content exceeds the page height
+    // Handle multi-line description
+    const description = modelDescription[model];
+    const maxWidth = doc.internal.pageSize.width - 20; // 10px padding on each side
+    const lines = doc.splitTextToSize(description, maxWidth);
+    let y = 65;
+    lines.forEach(line => {
+        doc.text(line, 10, y);
+        y += 5; // Add vertical spacing between lines
+        if (y > 280) { // If content exceeds page height, add a new page
             doc.addPage();
-            y = 20; // Reset y when a new page is added
+            y = 10; // Reset vertical position when adding a new page
         }
     });
 
-    const now = new Date();
-    const fileName = `portfolio_management_tool_${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}_${String(now.getHours()).padStart(2, '0')}-${String(now.getMinutes()).padStart(2, '0')}-${String(now.getSeconds()).padStart(2, '0')}.pdf`;
-    const pdfData = doc.output('bloburl');
-    window.open(pdfData, '_blank'); // Open the PDF in a new page
+    doc.text("Total Portfolio Value:", 10, y + 10);
+
+    // Convert Plotly plot to image and add to PDF with increased DPI
+    Plotly.toImage(document.getElementById('plot'), { format: 'png', width: 1000, height: 800, scale: 2 }) // Adjust dimensions and scale
+        .then(function (dataUrl) {
+            doc.addImage(dataUrl, 'PNG', 10, y + 20, 180, 144); // Adjust dimensions
+
+            doc.addPage();
+            doc.setFontSize(12);
+            doc.setFont("helvetica", "bold");
+            doc.text("Performance Summary:", 10, 10);
+
+            const table = document.getElementById("performanceTable");
+            const rows = table.querySelectorAll("tr");
+            let rowY = 20;
+            rows.forEach(row => {
+                const cells = row.querySelectorAll("th, td");
+                let x = 10;
+                cells.forEach((cell, index) => {
+                    if (index === 0) {
+                        doc.setFont("helvetica", "bold");
+                    } else {
+                        doc.setFont("helvetica", "normal");
+                    }
+                    doc.text(cell.innerText, x, rowY);
+                    x += 50;  // Adjusted to add space between columns
+                });
+                rowY += 10;
+                if (rowY > 280) { // Add a new page if the content exceeds the page height
+                    doc.addPage();
+                    rowY = 20; // Reset y when a new page is added
+                }
+            });
+
+            // Disclaimer Handling
+            const disclaimer = "© 2025 Risk-Dynamics. All rights reserved. This tool is intended for educational and informational purposes only. It does not provide financial, investment, or legal advice. The simulations and data presented are based on mathematical models and historical assumptions, which do not guarantee future performance. Users should conduct their own research and consult with a professional before making any financial or investment decisions. The creators of this tool are not responsible for any losses incurred from its use.";
+            doc.setFontSize(6);
+            
+            const linesDisclaimer = doc.splitTextToSize(disclaimer, maxWidth);
+
+            let pageCount = doc.internal.getNumberOfPages();
+            for (let i = 1; i <= pageCount; i++) {
+                doc.setPage(i);
+                doc.text(linesDisclaimer, 10, 290);
+            }
+
+            // Generate file name with timestamp
+            const fileName = `portfolio_management_tool_${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}_${String(now.getHours()).padStart(2, '0')}-${String(now.getMinutes()).padStart(2, '0')}-${String(now.getSeconds()).padStart(2, '0')}.pdf`;
+            
+            // Open PDF in a new window
+            const pdfData = doc.output('bloburl');
+            window.open(pdfData, '_blank');
+        });
 }
+
 
 // Run on load
 document.getElementById("plotContainer").style.display = "none"; // Hide the plot container initially
