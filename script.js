@@ -196,6 +196,8 @@ function generateMarketDates(N) {
 }
 
 // Simulate stock prices and update UI
+const useMultiprocessing = false; // Flag to enable or disable multiprocessing
+
 async function simulate() {
     let { numStocks, T, S0, mu, sigma, deposit, depositFreq, model } = getUserInputs();
     let dt = 1 / 252;
@@ -214,30 +216,54 @@ async function simulate() {
     document.getElementById("savePdfButton").style.display = "none";
 
     let completed = 0;
-    let workerPromises = Array.from({ length: numStocks }, (_, index) => new Promise((resolve, reject) => {
-        let worker = new Worker("worker.js");
-        worker.postMessage({ S0, mu, sigma, N, dt, deposit, depositFreq, model });
+    let workerPromises;
 
-        worker.onmessage = function (event) {
-            if (event.data.success) {
-                resolve(event.data.stockPath);
-                completed++;
-                progressBarFill.style.width = `${(completed / numStocks) * 100}%`;
-            } else {
-                reject(event.data.error);
-            }
-            worker.terminate();
-        };
-    }));
+    if (useMultiprocessing) {
+        let simulationsPerWorker = Math.ceil(numStocks / navigator.hardwareConcurrency);
+        workerPromises = Array.from({ length: navigator.hardwareConcurrency }, (_, index) => new Promise((resolve, reject) => {
+            let worker = new Worker("worker.js");
+            worker.postMessage({ simulations: simulationsPerWorker, S0, mu, sigma, N, dt, deposit, depositFreq, model });
+
+            worker.onmessage = function (event) {
+                if (event.data.success) {
+                    resolve(event.data.results);
+                    completed += simulationsPerWorker;
+                    let progress = Math.min((completed / numStocks) * 100, 100);
+                    progressBarFill.style.width = `${progress}%`;
+                } else {
+                    reject(event.data.error);
+                }
+                worker.terminate();
+            };
+        }));
+    } else {
+        workerPromises = Array.from({ length: numStocks }, (_, index) => new Promise((resolve) => {
+            let worker = new Worker("worker.js");
+            worker.postMessage({ simulations: 1, S0, mu, sigma, N, dt, deposit, depositFreq, model });
+
+            worker.onmessage = function (event) {
+                if (event.data.success) {
+                    resolve(event.data.results[0]);
+                    completed++;
+                    let progress = Math.min((completed / numStocks) * 100, 100);
+                    progressBarFill.style.width = `${progress}%`;
+                }
+                worker.terminate();
+            };
+        }));
+    }
 
     try {
-        let stockReturns = await Promise.all(workerPromises);
+        let results = await Promise.all(workerPromises);
+        let stockReturns = useMultiprocessing ? results.flat() : results;
         updateUI(stockReturns, traces, T);
         document.getElementById("savePdfButton").style.display = "block"; 
     } catch (error) {
         alert("Simulation failed: " + error);
     } finally {
-        progressBarFill.style.width = "100%"; // Ensure the progress bar reaches 100%
+        if (!useMultiprocessing) {
+            progressBarFill.style.width = "100%"; // Ensure the progress bar reaches 100% for single processing
+        }
         setTimeout(() => {
             progressContainer.style.display = "none";
         }, 500); // Add a slight delay before hiding the progress bar
