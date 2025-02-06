@@ -213,6 +213,7 @@ async function simulate() {
     document.getElementById("totalPortfolioValueContainer").style.display = "none";
     document.getElementById("savePdfButton").style.display = "none";
 
+    let completed = 0;
     let workerPromises = Array.from({ length: numStocks }, (_, index) => new Promise((resolve, reject) => {
         let worker = new Worker("worker.js");
         worker.postMessage({ S0, mu, sigma, N, dt, deposit, depositFreq, model });
@@ -220,7 +221,8 @@ async function simulate() {
         worker.onmessage = function (event) {
             if (event.data.success) {
                 resolve(event.data.stockPath);
-                progressBarFill.style.width = `${((index + 1) / numStocks) * 100}%`;
+                completed++;
+                progressBarFill.style.width = `${(completed / numStocks) * 100}%`;
             } else {
                 reject(event.data.error);
             }
@@ -235,7 +237,10 @@ async function simulate() {
     } catch (error) {
         alert("Simulation failed: " + error);
     } finally {
-        progressContainer.style.display = "none";
+        progressBarFill.style.width = "100%"; // Ensure the progress bar reaches 100%
+        setTimeout(() => {
+            progressContainer.style.display = "none";
+        }, 500); // Add a slight delay before hiding the progress bar
     }
 }
 
