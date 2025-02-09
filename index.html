@@ -20,13 +20,13 @@
         </header>
 
     <div class="controls">
-        <label>📈 Number of Simulations: <input type="number" id="numStocks" value="100" min="10" max="500" oninput="validateInteger(this, 100, 500)" inputmode="numeric" pattern="[0-9]*"></label>
-        <label>⏳ Time Period (Years): <input type="number" id="timePeriod" value="20" min="1" max="150" oninput="validateInteger(this, 1, 150)" inputmode="numeric" pattern="[0-9]*"></label>
-        <label>💵 Initial Deposit: <span class="currency-symbol">$</span>
+        <label title="The number of simulations to run. More simulations provide more accurate results but take longer to compute.">📈 Number of Simulations: <input type="number" id="numStocks" value="100" min="10" max="500" oninput="validateInteger(this, 100, 500)" inputmode="numeric" pattern="[0-9]*"></label>
+        <label title="The time period over which the simulation will run, in years.">⏳ Time Period (Years): <input type="number" id="timePeriod" value="20" min="1" max="150" oninput="validateInteger(this, 1, 150)" inputmode="numeric" pattern="[0-9]*"></label>
+        <label title="The initial amount of money deposited into the portfolio.">💵 Initial Deposit: <span class="currency-symbol">$</span>
             <input type="number" id="initialPrice" value="1000" min="0" step="1000" oninput="validateInteger(this, 1, Infinity)" inputmode="numeric" pattern="[0-9]*">
         </label>
-        <label>💰 Additional Deposit: <span class="currency-symbol">$</span><input type="number" id="depositAmount" value="50" min="0" step="50" oninput="validateInteger(this, 0, Infinity)" inputmode="numeric" pattern="[0-9]*"></label>
-        <label>📅 Deposit Frequency:
+        <label title="The amount of money added to the portfolio at each deposit interval.">💰 Additional Deposit: <span class="currency-symbol">$</span><input type="number" id="depositAmount" value="50" min="0" step="50" oninput="validateInteger(this, 0, Infinity)" inputmode="numeric" pattern="[0-9]*"></label>
+        <label title="How often additional deposits are made into the portfolio.">📅 Deposit Frequency:
             <select id="depositFrequency">
                 <option value="daily">Daily</option>
                 <option value="monthly" selected>Monthly</option>
@@ -35,31 +35,41 @@
         </label>
     </div>
     <div class="controls">
-        <label>📈 Select Index:
+        <label title="Select a predefined index or choose 'Custom' to input your own expected return and volatility.">📈 Select Index:
             <select id="indexSelect" class="index-select">
-                <option value="">Custom</option>
-                <option value="S&P500">S&P 500</option>
-                <option value="NASDAQ">NASDAQ</option>
-                <option value="DOWJONES">DOW JONES</option>
-                <option value="FTSE100">FTSE 100</option>
-                <option value="DAX">DAX</option>
-                <option value="CAC40">CAC 40</option>
-                <option value="NIKKEI225">NIKKEI 225</option>
-                <option value="SSE">SSE Composite</option>
-                <option value="US10Y">US 10-Year Treasury</option>
-                <option value="EU10Y">EU 10-Year Bond</option>
-                <option value="JP10Y">Japan 10-Year Bond</option>
-            </select>
+                <option value="" title="Define a custom index or select from the available options.">Custom</option>
+                <option value="S&P500" title="The S&P 500 tracks the performance of 500 large U.S. companies, representing a broad measure of the U.S. stock market.">S&P 500</option>
+                <option value="NASDAQ" title="The NASDAQ Composite Index focuses on technology and growth stocks, including many of the world's leading tech companies.">NASDAQ</option>
+                <option value="DOWJONES" title="The Dow Jones Industrial Average (DJIA) is a price-weighted index of 30 significant U.S. companies, often used as a benchmark for the economy.">DOW JONES</option>
+                <option value="FTSE100" title="The FTSE 100 is an index of the 100 largest companies listed on the London Stock Exchange, representing the U.K. stock market.">FTSE 100</option>
+                <option value="DAX" title="The DAX 40 is Germany’s leading stock index, tracking the 40 largest and most liquid companies listed on the Frankfurt Stock Exchange.">DAX</option>
+                <option value="CAC40" title="The CAC 40 is the benchmark stock index of France, composed of the 40 largest companies listed on the Euronext Paris exchange.">CAC 40</option>
+                <option value="NIKKEI225" title="The Nikkei 225 is Japan's leading stock index, representing 225 major companies on the Tokyo Stock Exchange.">NIKKEI 225</option>
+                <option value="SSE" title="The SSE Composite Index tracks all stocks listed on the Shanghai Stock Exchange, reflecting China's market performance.">SSE Composite</option>
+                <option value="US10Y" title="The U.S. 10-Year Treasury yield represents the interest rate paid on U.S. government bonds with a 10-year maturity, a key economic indicator.">US 10-Year Treasury</option>
+                <option value="EU10Y" title="The EU 10-Year Bond yield measures the interest rate on 10-year government bonds from major European economies, reflecting European financial conditions.">EU 10-Year Bond</option>
+                <option value="JP10Y" title="The Japan 10-Year Bond yield represents the interest rate on 10-year Japanese government bonds, used to gauge Japan's economic stability.">Japan 10-Year Bond</option>
+            </select>            
         </label>
-        <label>📊 Expected Return: <input type="number" id="mu" value="12" step="0.5" min="0" oninput="validateDecimal(this, 0, Infinity, 0)" inputmode="decimal" pattern="[0-9]*">%</label>
-        <label>📉 Volatility: <input type="number" id="sigma" value="15" step="0.5" min="0" oninput="validateDecimal(this, 0, Infinity, 0)" inputmode="decimal" pattern="[0-9]*">%</label>
-        <label>📈 Select Model:
+        <label title="The expected annual return of the portfolio, expressed as a percentage.">📊 Expected Return: <input type="number" id="mu" value="12" step="0.5" min="0" oninput="validateDecimal(this, 0, Infinity, 0)" inputmode="decimal" pattern="[0-9]*">%</label>
+        <label title="The annual volatility of the portfolio, expressed as a percentage.">📉 Volatility: <input type="number" id="sigma" value="15" step="0.5" min="0" oninput="validateDecimal(this, 0, Infinity, 0)" inputmode="decimal" pattern="[0-9]*">%</label>
+        <label title="Select the model used for the simulation. Each model has different assumptions and characteristics.">📈 Select Model:
             <select id="modelSelect" class="model-select">
-                <option value="GBM">Geometric Brownian Motion (GBM)</option>
-                <option value="Heston">Heston Stochastic Volatility Model</option>
-                <option value="JumpDiffusion">Jump-Diffusion Model (Merton's Model)</option>
-                <option value="MonteCarlo">Monte Carlo Simulation for Portfolio Risk</option>
-                <option value="FamaFrench">Fama-French Factor Model</option>
+                <option value="GBM" title="Geometric Brownian Motion (GBM) is a stochastic process widely used to model stock prices and other financial assets. It assumes continuous price movements with constant drift and volatility.">
+                    Geometric Brownian Motion (GBM)
+                </option>
+                <option value="Heston" title="The Heston Model is a stochastic volatility model that allows volatility to vary over time, capturing market behaviors like volatility clustering and mean reversion.">
+                    Heston Model (Stochastic Volatility)
+                </option>
+                <option value="JumpDiffusion" title="The Jump-Diffusion Model extends GBM by incorporating sudden, random jumps in asset prices, making it useful for modeling market crashes and extreme price changes.">
+                    Jump-Diffusion Model
+                </option>
+                <option value="MonteCarlo" title="Monte Carlo Simulation (MCS) is a computational technique that uses random sampling to estimate the probability of different financial outcomes, often applied in risk assessment and pricing derivatives.">
+                    Monte Carlo Simulation (MCS)
+                </option>
+                <option value="FamaFrench" title="The Fama-French Factor Model extends the CAPM by including multiple factors (market risk, size, and value) to explain stock returns more accurately.">
+                    Fama-French Factor Model
+                </option>
             </select>
         </label>
     </div>
