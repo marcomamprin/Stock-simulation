@@ -310,12 +310,20 @@ function updateUI(stockReturns, traces, T) {
         xaxis: { color: document.body.classList.contains("dark-mode") ? "#f4f4f4" : "#333" },
         yaxis: { color: document.body.classList.contains("dark-mode") ? "#f4f4f4" : "#333" },
         autosize: true, // Make the plot responsive
-        margin: { l: 40, r: 20, t: 40, b: 40 } // Adjust margins for better fit on small screens
+        margin: { l: 40, r: 20, t: 40, b: 40 }, // Adjust margins for better fit on small screens
+        dragmode: false // Disable zooming with selection
     };
-
+    
+    let config = {
+        responsive: true,
+        displayModeBar: false, // Disable the mode bar
+        scrollZoom: false, // Disable zooming with the scroll wheel
+        doubleClick: false // Disable zooming with double click
+    };
+    
     updatePerformanceAndUI(stockReturns, T);
-
-    Plotly.newPlot("plot", traces, layout, { responsive: true });
+    
+    Plotly.newPlot("plot", traces, layout, config);
 }
 
 // Separate function for updating performance and UI elements
@@ -378,6 +386,8 @@ function updatePerformanceTable(stockReturns, years) {
     // Get the current year
     let currentYear = new Date().getFullYear();
     let lastTop10, lastBottom10, lastMedian;
+    let { S0, deposit, depositFreq } = getUserInputs();
+    let depositInterval = depositFreq === "daily" ? 1 : depositFreq === "monthly" ? 21 : 252;
     
     for (let year = currentYear; year < currentYear + years; year++) {
         let yearIndex = Math.min((year - currentYear + 1) * yearlySteps - 1, stockReturns[0].length - 1);
@@ -393,7 +403,9 @@ function updatePerformanceTable(stockReturns, years) {
         let bottom10 = finalValues[bottom10Index];
         let median = finalValues.length % 2 === 0 ? (finalValues[medianIndex - 1] + finalValues[medianIndex]) / 2 : finalValues[medianIndex];
 
-        let row = `<tr><td>${year}</td><td>€${formatNumberWithCommas(Math.round(top10))}</td><td>€${formatNumberWithCommas(Math.round(median))}</td><td>€${formatNumberWithCommas(Math.round(bottom10))}</td></tr>`;
+        let totalDeposit = S0 + Math.floor(yearIndex / depositInterval) * deposit;
+
+        let row = `<tr><td>${year}</td><td>€${formatNumberWithCommas(totalDeposit)}</td><td>€${formatNumberWithCommas(Math.round(top10))}</td><td>€${formatNumberWithCommas(Math.round(median))}</td><td>€${formatNumberWithCommas(Math.round(bottom10))}</td></tr>`;
         tableBody.innerHTML += row;
 
         if (year === currentYear + years - 1) {
@@ -454,7 +466,7 @@ function generatePDF() {
     doc.text(`Date of Simulation: ${dateString}`, 10, 20);
     doc.text(`Number of Simulations: ${document.getElementById("numStocks").value}`, 10, 25);
     doc.text(`Time Period (Years): ${document.getElementById("timePeriod").value}`, 10, 30);
-    doc.text(`Initial Portfolio Price: ${document.getElementById("initialPrice").value}`, 10, 35);
+    doc.text(`Initial Deposit: ${document.getElementById("initialPrice").value}`, 10, 35);
     doc.text(`Additional Deposit: ${document.getElementById("depositAmount").value}`, 10, 40);
     doc.text(`Deposit Frequency: ${document.getElementById("depositFrequency").value}`, 10, 45);
     doc.text(`Expected Return: ${document.getElementById("mu").value}%`, 10, 50);
@@ -500,7 +512,7 @@ function generatePDF() {
                         doc.setFont("helvetica", "normal");
                     }
                     doc.text(cell.innerText, x, rowY);
-                    x += 50;  // Adjusted to add space between columns
+                    x += 40;  // Adjusted to add space between columns
                 });
                 rowY += 10;
                 if (rowY > 280) { // Add a new page if the content exceeds the page height
