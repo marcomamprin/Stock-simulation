@@ -15,7 +15,9 @@ function updatePlotTheme() {
         "plot_bgcolor": plotBgColor,
         "font.color": fontColor,
         "xaxis.color": fontColor,
-        "yaxis.color": fontColor
+        "yaxis.color": fontColor,
+        "xaxis.title.font.color": fontColor, // Ensure x-axis title is visible
+        "yaxis.title.font.color": fontColor  // Ensure y-axis title is visible
     });
 }
 
@@ -299,23 +301,59 @@ function updateUI(stockReturns, traces, T) {
 
     let layout = {
         title: "Simulated Portfolio Price Over Time",
-        xaxis: { title: "Date", type: "date" },
-        yaxis: { title: "Portfolio Price" },
+        xaxis: { 
+            title: "Date", 
+            type: "date",
+            titlefont: { 
+                color: document.body.classList.contains("dark-mode") ? "#f4f4f4" : "#333",
+                size: 14 // Increase size of x-axis title
+            },
+            tickfont: { 
+                size: 12 // Increase size of x-axis labels
+            },
+            showline: true, // Show x-axis line
+            showgrid: true, // Show x-axis grid
+            linecolor: document.body.classList.contains("dark-mode") ? "#f4f4f4" : "#333", // Axis line color
+            gridcolor: document.body.classList.contains("dark-mode") ? "#555" : "#ddd" // Grid color
+        },
+        yaxis: { 
+            title: "Portfolio Price ($)",
+            titlefont: { 
+                color: document.body.classList.contains("dark-mode") ? "#f4f4f4" : "#333",
+                size: 14 // Increase size of y-axis title
+            },
+            tickfont: { 
+                size: 12 // Increase size of y-axis labels
+            },
+            showline: true, // Show y-axis line
+            showgrid: true, // Show y-axis grid
+            linecolor: document.body.classList.contains("dark-mode") ? "#f4f4f4" : "#333", // Axis line color
+            gridcolor: document.body.classList.contains("dark-mode") ? "#555" : "#ddd", // Grid color
+            rangemode: "tozero" // Ensure no negative values on the y-axis unless necessary
+        },
         showlegend: true,
-        legend: { orientation: "h", y: -0.2 }, // Place legend at the bottom
+        legend: { orientation: "h", y: -0.2 , x: 0.25 }, // Place legend at the bottom
         template: document.body.classList.contains("dark-mode") ? "plotly_dark" : "plotly_white",
         paper_bgcolor: document.body.classList.contains("dark-mode") ? "#222" : "#fff",
         plot_bgcolor: document.body.classList.contains("dark-mode") ? "#222" : "#fff",
         font: { color: document.body.classList.contains("dark-mode") ? "#f4f4f4" : "#333" },
-        xaxis: { color: document.body.classList.contains("dark-mode") ? "#f4f4f4" : "#333" },
-        yaxis: { color: document.body.classList.contains("dark-mode") ? "#f4f4f4" : "#333" },
         autosize: true, // Make the plot responsive
-        margin: { l: 40, r: 20, t: 40, b: 40 } // Adjust margins for better fit on small screens
+        margin: { l: 60, r: 20, t: 40, b: 60 }, // Adjust margins for better fit on small screens
+        height: 600, // Reduce the height of the plot
+        dragmode: false // Disable zooming with selection
     };
-
+    
+    let config = {
+        responsive: true,
+        displayModeBar: false, // Disable the mode bar
+        scrollZoom: false, // Disable zooming with the scroll wheel
+        doubleClick: false // Disable zooming with double click
+    };
+    
     updatePerformanceAndUI(stockReturns, T);
-
-    Plotly.newPlot("plot", traces, layout, { responsive: true });
+    
+    Plotly.newPlot("plot", traces, layout, config);
+    
 }
 
 // Separate function for updating performance and UI elements
@@ -378,6 +416,8 @@ function updatePerformanceTable(stockReturns, years) {
     // Get the current year
     let currentYear = new Date().getFullYear();
     let lastTop10, lastBottom10, lastMedian;
+    let { S0, deposit, depositFreq } = getUserInputs();
+    let depositInterval = depositFreq === "daily" ? 1 : depositFreq === "monthly" ? 21 : 252;
     
     for (let year = currentYear; year < currentYear + years; year++) {
         let yearIndex = Math.min((year - currentYear + 1) * yearlySteps - 1, stockReturns[0].length - 1);
@@ -393,7 +433,9 @@ function updatePerformanceTable(stockReturns, years) {
         let bottom10 = finalValues[bottom10Index];
         let median = finalValues.length % 2 === 0 ? (finalValues[medianIndex - 1] + finalValues[medianIndex]) / 2 : finalValues[medianIndex];
 
-        let row = `<tr><td>${year}</td><td>€${formatNumberWithCommas(Math.round(top10))}</td><td>€${formatNumberWithCommas(Math.round(median))}</td><td>€${formatNumberWithCommas(Math.round(bottom10))}</td></tr>`;
+        let totalDeposit = S0 + Math.floor(yearIndex / depositInterval) * deposit;
+
+        let row = `<tr><td>${year}</td><td>$${formatNumberWithCommas(totalDeposit)}</td><td>$${formatNumberWithCommas(Math.round(top10))}</td><td>$${formatNumberWithCommas(Math.round(median))}</td><td>$${formatNumberWithCommas(Math.round(bottom10))}</td></tr>`;
         tableBody.innerHTML += row;
 
         if (year === currentYear + years - 1) {
@@ -416,20 +458,19 @@ function updateTotalReturns(lastTop10, lastBottom10, lastMedian) {
             </tr>
             <tr>
                 <td style="text-align: right; padding-right: 20px;" title="Best 10%">Optimistic Scenario</td>
-                <td style="text-align: right;">€${formatNumberWithCommas(Math.round(lastTop10))}</td>
+                <td style="text-align: right;">$${formatNumberWithCommas(Math.round(lastTop10))}</td>
             </tr>
             <tr>
                 <td style="text-align: right; padding-right: 20px;" title="Computed as the median value">Average Scenario</td>
-                <td style="text-align: right;">€${formatNumberWithCommas(Math.round(lastMedian))}</td>
+                <td style="text-align: right;">$${formatNumberWithCommas(Math.round(lastMedian))}</td>
             </tr>
             <tr>
                 <td style="text-align: right; padding-right: 20px;" title="Worst 10%">Pessimistic Scenario</td>
-                <td style="text-align: right;">€${formatNumberWithCommas(Math.round(lastBottom10))}</td>
+                <td style="text-align: right;">$${formatNumberWithCommas(Math.round(lastBottom10))}</td>
             </tr>
         </table>
     `;
 }
-
 
 function generatePDF() {
     const { jsPDF } = window.jspdf;
@@ -454,7 +495,7 @@ function generatePDF() {
     doc.text(`Date of Simulation: ${dateString}`, 10, 20);
     doc.text(`Number of Simulations: ${document.getElementById("numStocks").value}`, 10, 25);
     doc.text(`Time Period (Years): ${document.getElementById("timePeriod").value}`, 10, 30);
-    doc.text(`Initial Portfolio Price: ${document.getElementById("initialPrice").value}`, 10, 35);
+    doc.text(`Initial Deposit: ${document.getElementById("initialPrice").value}`, 10, 35);
     doc.text(`Additional Deposit: ${document.getElementById("depositAmount").value}`, 10, 40);
     doc.text(`Deposit Frequency: ${document.getElementById("depositFrequency").value}`, 10, 45);
     doc.text(`Expected Return: ${document.getElementById("mu").value}%`, 10, 50);
@@ -478,7 +519,7 @@ function generatePDF() {
     doc.text("Total Portfolio Value:", 10, y + 10);
 
     // Convert Plotly plot to image and add to PDF with increased DPI
-    Plotly.toImage(document.getElementById('plot'), { format: 'png', width: 1000, height: 800, scale: 2 }) // Adjust dimensions and scale
+    Plotly.toImage(document.getElementById('plot'), { format: 'png', width: 1000, height: 800, scale: 1.5 }) // Adjust dimensions and scale
         .then(function (dataUrl) {
             doc.addImage(dataUrl, 'PNG', 10, y + 20, 180, 144); // Adjust dimensions
 
@@ -500,7 +541,7 @@ function generatePDF() {
                         doc.setFont("helvetica", "normal");
                     }
                     doc.text(cell.innerText, x, rowY);
-                    x += 50;  // Adjusted to add space between columns
+                    x += 40;  // Adjusted to add space between columns
                 });
                 rowY += 10;
                 if (rowY > 280) { // Add a new page if the content exceeds the page height
@@ -522,14 +563,12 @@ function generatePDF() {
             }
 
             // Generate file name with timestamp
-            const fileName = `portfolio_management_tool_${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}_${String(now.getHours()).padStart(2, '0')}-${String(now.getMinutes()).padStart(2, '0')}-${String(now.getSeconds()).padStart(2, '0')}.pdf`;
+            const fileName = `Stock_Price_Simulation_Tool_${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}_${String(now.getHours()).padStart(2, '0')}-${String(now.getMinutes()).padStart(2, '0')}-${String(now.getSeconds()).padStart(2, '0')}.pdf`;
             
-            // Open PDF in a new window
-            const pdfData = doc.output('bloburl');
-            window.open(pdfData, '_blank');
+            // Trigger download
+            doc.save(fileName);
         });
 }
-
 
 // Run on load
 document.getElementById("plotContainer").style.display = "none"; // Hide the plot container initially
