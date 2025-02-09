@@ -442,7 +442,6 @@ function updateTotalReturns(lastTop10, lastBottom10, lastMedian) {
     `;
 }
 
-
 function generatePDF() {
     const { jsPDF } = window.jspdf;
     const doc = new jsPDF();
@@ -534,14 +533,12 @@ function generatePDF() {
             }
 
             // Generate file name with timestamp
-            const fileName = `portfolio_management_tool_${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}_${String(now.getHours()).padStart(2, '0')}-${String(now.getMinutes()).padStart(2, '0')}-${String(now.getSeconds()).padStart(2, '0')}.pdf`;
+            const fileName = `Stock_Price_Simulation_Tool_${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}_${String(now.getHours()).padStart(2, '0')}-${String(now.getMinutes()).padStart(2, '0')}-${String(now.getSeconds()).padStart(2, '0')}.pdf`;
             
-            // Open PDF in a new window
-            const pdfData = doc.output('bloburl');
-            window.open(pdfData, '_blank');
+            // Trigger download
+            doc.save(fileName);
         });
 }
-
 
 // Run on load
 document.getElementById("plotContainer").style.display = "none"; // Hide the plot container initially
