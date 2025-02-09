@@ -15,7 +15,9 @@ function updatePlotTheme() {
         "plot_bgcolor": plotBgColor,
         "font.color": fontColor,
         "xaxis.color": fontColor,
-        "yaxis.color": fontColor
+        "yaxis.color": fontColor,
+        "xaxis.title.font.color": fontColor, // Ensure x-axis title is visible
+        "yaxis.title.font.color": fontColor  // Ensure y-axis title is visible
     });
 }
 
@@ -299,18 +301,45 @@ function updateUI(stockReturns, traces, T) {
 
     let layout = {
         title: "Simulated Portfolio Price Over Time",
-        xaxis: { title: "Date", type: "date" },
-        yaxis: { title: "Portfolio Price" },
+        xaxis: { 
+            title: "Date", 
+            type: "date",
+            titlefont: { 
+                color: document.body.classList.contains("dark-mode") ? "#f4f4f4" : "#333",
+                size: 14 // Increase size of x-axis title
+            },
+            tickfont: { 
+                size: 12 // Increase size of x-axis labels
+            },
+            showline: true, // Show x-axis line
+            showgrid: true, // Show x-axis grid
+            linecolor: document.body.classList.contains("dark-mode") ? "#f4f4f4" : "#333", // Axis line color
+            gridcolor: document.body.classList.contains("dark-mode") ? "#555" : "#ddd" // Grid color
+        },
+        yaxis: { 
+            title: "Portfolio Price ($)",
+            titlefont: { 
+                color: document.body.classList.contains("dark-mode") ? "#f4f4f4" : "#333",
+                size: 14 // Increase size of y-axis title
+            },
+            tickfont: { 
+                size: 12 // Increase size of y-axis labels
+            },
+            showline: true, // Show y-axis line
+            showgrid: true, // Show y-axis grid
+            linecolor: document.body.classList.contains("dark-mode") ? "#f4f4f4" : "#333", // Axis line color
+            gridcolor: document.body.classList.contains("dark-mode") ? "#555" : "#ddd", // Grid color
+            rangemode: "tozero" // Ensure no negative values on the y-axis unless necessary
+        },
         showlegend: true,
-        legend: { orientation: "h", y: -0.2 }, // Place legend at the bottom
+        legend: { orientation: "h", y: -0.2 , x: 0.25 }, // Place legend at the bottom
         template: document.body.classList.contains("dark-mode") ? "plotly_dark" : "plotly_white",
         paper_bgcolor: document.body.classList.contains("dark-mode") ? "#222" : "#fff",
         plot_bgcolor: document.body.classList.contains("dark-mode") ? "#222" : "#fff",
         font: { color: document.body.classList.contains("dark-mode") ? "#f4f4f4" : "#333" },
-        xaxis: { color: document.body.classList.contains("dark-mode") ? "#f4f4f4" : "#333" },
-        yaxis: { color: document.body.classList.contains("dark-mode") ? "#f4f4f4" : "#333" },
         autosize: true, // Make the plot responsive
-        margin: { l: 40, r: 20, t: 40, b: 40 }, // Adjust margins for better fit on small screens
+        margin: { l: 60, r: 20, t: 40, b: 60 }, // Adjust margins for better fit on small screens
+        height: 600, // Reduce the height of the plot
         dragmode: false // Disable zooming with selection
     };
     
@@ -324,6 +353,7 @@ function updateUI(stockReturns, traces, T) {
     updatePerformanceAndUI(stockReturns, T);
     
     Plotly.newPlot("plot", traces, layout, config);
+    
 }
 
 // Separate function for updating performance and UI elements
@@ -405,7 +435,7 @@ function updatePerformanceTable(stockReturns, years) {
 
         let totalDeposit = S0 + Math.floor(yearIndex / depositInterval) * deposit;
 
-        let row = `<tr><td>${year}</td><td>€${formatNumberWithCommas(totalDeposit)}</td><td>€${formatNumberWithCommas(Math.round(top10))}</td><td>€${formatNumberWithCommas(Math.round(median))}</td><td>€${formatNumberWithCommas(Math.round(bottom10))}</td></tr>`;
+        let row = `<tr><td>${year}</td><td>$${formatNumberWithCommas(totalDeposit)}</td><td>$${formatNumberWithCommas(Math.round(top10))}</td><td>$${formatNumberWithCommas(Math.round(median))}</td><td>$${formatNumberWithCommas(Math.round(bottom10))}</td></tr>`;
         tableBody.innerHTML += row;
 
         if (year === currentYear + years - 1) {
@@ -428,15 +458,15 @@ function updateTotalReturns(lastTop10, lastBottom10, lastMedian) {
             </tr>
             <tr>
                 <td style="text-align: right; padding-right: 20px;" title="Best 10%">Optimistic Scenario</td>
-                <td style="text-align: right;">€${formatNumberWithCommas(Math.round(lastTop10))}</td>
+                <td style="text-align: right;">$${formatNumberWithCommas(Math.round(lastTop10))}</td>
             </tr>
             <tr>
                 <td style="text-align: right; padding-right: 20px;" title="Computed as the median value">Average Scenario</td>
-                <td style="text-align: right;">€${formatNumberWithCommas(Math.round(lastMedian))}</td>
+                <td style="text-align: right;">$${formatNumberWithCommas(Math.round(lastMedian))}</td>
             </tr>
             <tr>
                 <td style="text-align: right; padding-right: 20px;" title="Worst 10%">Pessimistic Scenario</td>
-                <td style="text-align: right;">€${formatNumberWithCommas(Math.round(lastBottom10))}</td>
+                <td style="text-align: right;">$${formatNumberWithCommas(Math.round(lastBottom10))}</td>
             </tr>
         </table>
     `;
@@ -489,7 +519,7 @@ function generatePDF() {
     doc.text("Total Portfolio Value:", 10, y + 10);
 
     // Convert Plotly plot to image and add to PDF with increased DPI
-    Plotly.toImage(document.getElementById('plot'), { format: 'png', width: 1000, height: 800, scale: 2 }) // Adjust dimensions and scale
+    Plotly.toImage(document.getElementById('plot'), { format: 'png', width: 1000, height: 800, scale: 1.5 }) // Adjust dimensions and scale
         .then(function (dataUrl) {
             doc.addImage(dataUrl, 'PNG', 10, y + 20, 180, 144); // Adjust dimensions
 

@@ -119,6 +119,22 @@ input {
     text-align: center;
 }
 
+input[type="number"] {
+    -moz-appearance: textfield;
+}
+
+input[type="number"]::-webkit-outer-spin-button,
+input[type="number"]::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+}
+
+input[type="number"]:focus {
+    outline: none;
+    border: 2px solid #007BFF;
+    border-radius: 5px;
+}
+
 /* Plot Styling */
 
 
@@ -134,6 +150,7 @@ input {
     border-radius: 10px; /* Smooth the corners */
     box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
     transition: background 0.3s, color 0.3s;
+    height: 600px; /* Reduce height to match the plot size */
 }
 
 
