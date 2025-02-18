@@ -1,4 +1,4 @@
-document.getElementById("darkModeToggle").addEventListener("click", function () {
+document.getElementById("darkModeToggle").addEventListener("click", function() {
     let darkMode = document.body.classList.toggle("dark-mode");
     localStorage.setItem("darkMode", darkMode);
     updatePlotTheme();
@@ -9,15 +9,15 @@ function updatePlotTheme() {
     let plotBgColor = document.body.classList.contains("dark-mode") ? "#222" : "#fff";
     let fontColor = document.body.classList.contains("dark-mode") ? "#f4f4f4" : "#333";
 
-    Plotly.relayout("plot", { 
-        template, 
-        "paper_bgcolor": plotBgColor, 
+    Plotly.relayout("plot", {
+        template,
+        "paper_bgcolor": plotBgColor,
         "plot_bgcolor": plotBgColor,
         "font.color": fontColor,
         "xaxis.color": fontColor,
         "yaxis.color": fontColor,
         "xaxis.title.font.color": fontColor, // Ensure x-axis title is visible
-        "yaxis.title.font.color": fontColor  // Ensure y-axis title is visible
+        "yaxis.title.font.color": fontColor // Ensure y-axis title is visible
     });
 }
 
@@ -40,7 +40,7 @@ const indexData = {
     "JP10Y": { mu: 0.5, sigma: 3.0 }
 };
 
-document.getElementById("indexSelect").addEventListener("change", function () {
+document.getElementById("indexSelect").addEventListener("change", function() {
     let selectedIndex = this.value;
     console.log("Selected index:", selectedIndex); // Debug line to check the selected value
     if (indexData[selectedIndex]) {
@@ -56,7 +56,8 @@ document.getElementById("indexSelect").addEventListener("change", function () {
 
 // Generate normally distributed random numbers
 function randomNormal() {
-    let u = Math.random(), v = Math.random();
+    let u = Math.random(),
+        v = Math.random();
     return Math.sqrt(-2.0 * Math.log(u)) * Math.cos(2.0 * Math.PI * v);
 }
 
@@ -93,14 +94,16 @@ function simulateStockPricesHeston(S0, mu, sigma, N, dt, deposit, depositFreq) {
     let S = new Array(N).fill(0);
     S[0] = S0;
     let v = sigma * sigma;
-    let kappa = 2.0, theta = sigma * sigma, eta = 0.3;
+    let kappa = 2.0,
+        theta = sigma * sigma,
+        eta = 0.3;
 
     for (let i = 1; i < N; i++) {
         let dW1 = Math.sqrt(dt) * normalRandom();
         let dW2 = Math.sqrt(dt) * normalRandom();
         v = Math.max(0, v + kappa * (theta - v) * dt + eta * Math.sqrt(v) * dW2);
         S[i] = S[i - 1] * Math.exp((mu - 0.5 * v) * dt + Math.sqrt(v) * dW1);
-        
+
         S[i] += applyDeposit(i, deposit, depositFreq); // Apply deposit here
     }
     return S;
@@ -110,13 +113,15 @@ function simulateStockPricesHeston(S0, mu, sigma, N, dt, deposit, depositFreq) {
 function simulateStockPricesJumpDiffusion(S0, mu, sigma, N, dt, deposit, depositFreq) {
     let S = new Array(N).fill(0);
     S[0] = S0;
-    let lambda = 0.1, jumpMean = 0.02, jumpStd = 0.05;
+    let lambda = 0.1,
+        jumpMean = 0.02,
+        jumpStd = 0.05;
 
     for (let i = 1; i < N; i++) {
         let dW = Math.sqrt(dt) * normalRandom();
         let J = (Math.random() < lambda * dt) ? Math.exp(jumpMean + jumpStd * normalRandom()) : 1;
         S[i] = S[i - 1] * J * Math.exp((mu - 0.5 * sigma * sigma) * dt + sigma * dW);
-        
+
         S[i] += applyDeposit(i, deposit, depositFreq); // Apply deposit here
     }
     return S;
@@ -130,7 +135,7 @@ function simulateStockPricesMonteCarlo(S0, mu, sigma, N, dt, deposit, depositFre
     for (let i = 1; i < N; i++) {
         let dW = Math.sqrt(dt) * normalRandom();
         S[i] = S[i - 1] * Math.exp((mu - 0.5 * sigma * sigma) * dt + sigma * dW);
-        
+
         S[i] += applyDeposit(i, deposit, depositFreq); // Apply deposit here
     }
     return S;
@@ -140,17 +145,17 @@ function simulateStockPricesMonteCarlo(S0, mu, sigma, N, dt, deposit, depositFre
 function simulateStockPricesFamaFrench(S0, mu, sigma, N, dt, deposit, depositFreq) {
     let S = new Array(N).fill(0);
     S[0] = S0;
-    let SMB = 0.03 * dt;  // Adjusting for the time step
-    let HML = 0.02 * dt;  // Adjusting for the time step
-    let betaSMB = 0.5;  // More reasonable coefficients
+    let SMB = 0.03 * dt; // Adjusting for the time step
+    let HML = 0.02 * dt; // Adjusting for the time step
+    let betaSMB = 0.5; // More reasonable coefficients
     let betaHML = 0.3;
 
     for (let i = 1; i < N; i++) {
         let dW = Math.sqrt(dt) * normalRandom();
         let famaFrenchFactor = betaSMB * SMB + betaHML * HML;
-        
+
         S[i] = S[i - 1] * Math.exp((mu - 0.5 * sigma * sigma + famaFrenchFactor) * dt + sigma * dW);
-        
+
         S[i] += applyDeposit(i, deposit, depositFreq); // Apply deposit here
     }
     return S;
@@ -226,7 +231,7 @@ async function simulate() {
             let worker = new Worker("worker.js");
             worker.postMessage({ simulations: simulationsPerWorker, S0, mu, sigma, N, dt, deposit, depositFreq, model });
 
-            worker.onmessage = function (event) {
+            worker.onmessage = function(event) {
                 if (event.data.success) {
                     resolve(event.data.results);
                     completed += simulationsPerWorker;
@@ -243,7 +248,7 @@ async function simulate() {
             let worker = new Worker("worker.js");
             worker.postMessage({ simulations: 1, S0, mu, sigma, N, dt, deposit, depositFreq, model });
 
-            worker.onmessage = function (event) {
+            worker.onmessage = function(event) {
                 if (event.data.success) {
                     resolve(event.data.results[0]);
                     completed++;
@@ -259,7 +264,7 @@ async function simulate() {
         let results = await Promise.all(workerPromises);
         let stockReturns = useMultiprocessing ? results.flat() : results;
         updateUI(stockReturns, traces, T);
-        document.getElementById("savePdfButton").style.display = "block"; 
+        document.getElementById("savePdfButton").style.display = "block";
     } catch (error) {
         alert("Simulation failed: " + error);
     } finally {
@@ -275,7 +280,7 @@ async function simulate() {
 // Update UI elements and plot results
 function updateUI(stockReturns, traces, T) {
     let percentilesData = calculatePercentiles(stockReturns);
-    let median = percentilesData.map(p => p[1]);  // 50th percentile (median)
+    let median = percentilesData.map(p => p[1]); // 50th percentile (median)
     let lowerCI = percentilesData.map(p => p[0]); // 10th percentile
     let upperCI = percentilesData.map(p => p[2]); // 90th percentile
 
@@ -301,14 +306,14 @@ function updateUI(stockReturns, traces, T) {
 
     let layout = {
         title: "Simulated Portfolio Price Over Time",
-        xaxis: { 
-            title: "Date", 
+        xaxis: {
+            title: "Date",
             type: "date",
-            titlefont: { 
+            titlefont: {
                 color: document.body.classList.contains("dark-mode") ? "#f4f4f4" : "#333",
                 size: 14 // Increase size of x-axis title
             },
-            tickfont: { 
+            tickfont: {
                 size: 12 // Increase size of x-axis labels
             },
             showline: true, // Show x-axis line
@@ -316,13 +321,13 @@ function updateUI(stockReturns, traces, T) {
             linecolor: document.body.classList.contains("dark-mode") ? "#f4f4f4" : "#333", // Axis line color
             gridcolor: document.body.classList.contains("dark-mode") ? "#555" : "#ddd" // Grid color
         },
-        yaxis: { 
+        yaxis: {
             title: "Portfolio Price ($)",
-            titlefont: { 
+            titlefont: {
                 color: document.body.classList.contains("dark-mode") ? "#f4f4f4" : "#333",
                 size: 14 // Increase size of y-axis title
             },
-            tickfont: { 
+            tickfont: {
                 size: 12 // Increase size of y-axis labels
             },
             showline: true, // Show y-axis line
@@ -332,7 +337,7 @@ function updateUI(stockReturns, traces, T) {
             rangemode: "tozero" // Ensure no negative values on the y-axis unless necessary
         },
         showlegend: true,
-        legend: { orientation: "h", y: -0.2 , x: 0.25 }, // Place legend at the bottom
+        legend: { orientation: "h", y: -0.2, x: 0.25 }, // Place legend at the bottom
         template: document.body.classList.contains("dark-mode") ? "plotly_dark" : "plotly_white",
         paper_bgcolor: document.body.classList.contains("dark-mode") ? "#222" : "#fff",
         plot_bgcolor: document.body.classList.contains("dark-mode") ? "#222" : "#fff",
@@ -342,18 +347,18 @@ function updateUI(stockReturns, traces, T) {
         height: 600, // Reduce the height of the plot
         dragmode: false // Disable zooming with selection
     };
-    
+
     let config = {
         responsive: true,
         displayModeBar: false, // Disable the mode bar
         scrollZoom: false, // Disable zooming with the scroll wheel
         doubleClick: false // Disable zooming with double click
     };
-    
+
     updatePerformanceAndUI(stockReturns, T);
-    
+
     Plotly.newPlot("plot", traces, layout, config);
-    
+
 }
 
 // Separate function for updating performance and UI elements
@@ -412,16 +417,16 @@ function updatePerformanceTable(stockReturns, years) {
     tableBody.innerHTML = ""; // Clear table
 
     let yearlySteps = Math.floor(stockReturns[0].length / years);
-    
+
     // Get the current year
     let currentYear = new Date().getFullYear();
     let lastTop10, lastBottom10, lastMedian;
     let { S0, deposit, depositFreq } = getUserInputs();
     let depositInterval = depositFreq === "daily" ? 1 : depositFreq === "monthly" ? 21 : 252;
-    
+
     for (let year = currentYear; year < currentYear + years; year++) {
         let yearIndex = Math.min((year - currentYear + 1) * yearlySteps - 1, stockReturns[0].length - 1);
-        
+
         let finalValues = stockReturns.map(path => path[yearIndex]);
         finalValues.sort((a, b) => a - b);
 
@@ -520,7 +525,7 @@ function generatePDF() {
 
     // Convert Plotly plot to image and add to PDF with increased DPI
     Plotly.toImage(document.getElementById('plot'), { format: 'png', width: 1000, height: 800, scale: 1.5 }) // Adjust dimensions and scale
-        .then(function (dataUrl) {
+        .then(function(dataUrl) {
             doc.addImage(dataUrl, 'PNG', 10, y + 20, 180, 144); // Adjust dimensions
 
             doc.addPage();
@@ -541,7 +546,7 @@ function generatePDF() {
                         doc.setFont("helvetica", "normal");
                     }
                     doc.text(cell.innerText, x, rowY);
-                    x += 40;  // Adjusted to add space between columns
+                    x += 40; // Adjusted to add space between columns
                 });
                 rowY += 10;
                 if (rowY > 280) { // Add a new page if the content exceeds the page height
@@ -553,7 +558,7 @@ function generatePDF() {
             // Disclaimer Handling
             const disclaimer = "© 2025 Risk-Dynamics. All rights reserved. This tool is intended for educational and informational purposes only. It does not provide financial, investment, or legal advice. The simulations and data presented are based on mathematical models and historical assumptions, which do not guarantee future performance. Users should conduct their own research and consult with a professional before making any financial or investment decisions. The creators of this tool are not responsible for any losses incurred from its use.";
             doc.setFontSize(6);
-            
+
             const linesDisclaimer = doc.splitTextToSize(disclaimer, maxWidth);
 
             let pageCount = doc.internal.getNumberOfPages();
@@ -564,7 +569,7 @@ function generatePDF() {
 
             // Generate file name with timestamp
             const fileName = `Stock_Price_Simulation_Tool_${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}_${String(now.getHours()).padStart(2, '0')}-${String(now.getMinutes()).padStart(2, '0')}-${String(now.getSeconds()).padStart(2, '0')}.pdf`;
-            
+
             // Trigger download
             doc.save(fileName);
         });
@@ -604,5 +609,3 @@ function calculatePercentiles(stockReturns, percentiles = [10, 50, 90]) {
     }
     return percentilesData;
 }
-
-

@@ -1,5 +1,8 @@
 /* General Styling */
+
+
 /* Basic styling for the body and general containers */
+
 body {
     font-family: Arial, sans-serif;
     background-color: #f4f4f4;
@@ -10,10 +13,12 @@ body {
     transition: background 0.3s, color 0.3s;
 }
 
-.container, .controls {
+.container,
+.controls {
     width: 100%;
     max-width: 1200px;
-    margin: 0 auto; /* Center the containers */
+    margin: 0 auto;
+    /* Center the containers */
     padding: 0px;
 }
 
@@ -27,8 +32,12 @@ h1 {
     margin: 10px;
 }
 
+
 /* Decimal Input Styling */
+
+
 /* Styling for decimal input fields */
+
 .decimal-input {
     width: 100px;
 }
@@ -45,8 +54,12 @@ h1 {
     border: 1px solid red;
 }
 
+
 /* Button Styling */
+
+
 /* Styling for buttons */
+
 button {
     background: #007BFF;
     color: white;
@@ -86,8 +99,12 @@ button:hover {
     color: white;
 }
 
+
 /* Controls Section */
+
+
 /* Styling for the controls section */
+
 .controls {
     max-width: 1200px;
     display: grid;
@@ -135,11 +152,13 @@ input[type="number"]:focus {
     border-radius: 5px;
 }
 
+
 /* Plot Styling */
 
 
 /* Returns plotContainer Styling */
-#plotContainer{
+
+#plotContainer {
     width: 100%;
     display: none;
     background: white;
@@ -147,16 +166,23 @@ input[type="number"]:focus {
     padding: 20px;
     margin-top: 20px;
     margin-bottom: 20px;
-    border-radius: 10px; /* Smooth the corners */
+    border-radius: 10px;
+    /* Smooth the corners */
     box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
     transition: background 0.3s, color 0.3s;
-    height: 600px; /* Reduce height to match the plot size */
+    height: 600px;
+    /* Reduce height to match the plot size */
 }
 
 
 /* Returns Container Styling */
+
+
 /* Styling for the returns container */
-#returnsContainer, #totalPortfolioValueContainer, #performanceTableContainer {
+
+#returnsContainer,
+#totalPortfolioValueContainer,
+#performanceTableContainer {
     width: 100%;
     max-width: 100%;
     margin-top: 0px;
@@ -165,7 +191,8 @@ input[type="number"]:focus {
     background: white;
     border: 2px solid #ddd;
     padding: 20px;
-    border-radius: 10px; /* Smooth the corners */
+    border-radius: 10px;
+    /* Smooth the corners */
     box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
     transition: background 0.3s, color 0.3s;
 }
@@ -182,7 +209,8 @@ input[type="number"]:focus {
     background: white;
     border: 2px solid #ddd;
     padding: 20px;
-    border-radius: 10px; /* Smooth the corners */
+    border-radius: 10px;
+    /* Smooth the corners */
     box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
     transition: background 0.3s, color 0.3s;
 }
@@ -206,7 +234,7 @@ input[type="number"]:focus {
     font-weight: bold;
 }
 
-#performanceTable th, 
+#performanceTable th,
 #performanceTable td {
     padding: 12px;
     border: 1px solid #ddd;
@@ -230,8 +258,12 @@ input[type="number"]:focus {
     font-weight: bold;
 }
 
+
 /* Dark Mode Styling */
+
+
 /* Styling for dark mode */
+
 .dark-mode {
     background-color: #1a1a1a;
     color: #f4f4f4;
@@ -252,20 +284,22 @@ input[type="number"]:focus {
     background: #cc8400;
 }
 
-.dark-mode #returnsContainer, .dark-mode #totalPortfolioValueContainer, .dark-mode #performanceTableContainer, .dark-mode #plotContainer {
+.dark-mode #returnsContainer,
+.dark-mode #totalPortfolioValueContainer,
+.dark-mode #performanceTableContainer,
+.dark-mode #plotContainer {
     background: #222;
     color: white;
     box-shadow: 0px 0px 10px rgba(255, 255, 255, 0.1);
     border: 2px solid #444;
 }
 
-
 .dark-mode #performanceTable thead {
     background-color: #ffa500;
     color: black;
 }
 
-.dark-mode #performanceTable th, 
+.dark-mode #performanceTable th,
 .dark-mode #performanceTable td {
     border-color: #555;
     color: white;
@@ -288,30 +322,41 @@ input[type="number"]:focus {
     color: black;
 }
 
+
 /* Responsive Styling */
+
+
 /* Styling for responsiveness */
+
 @media (max-width: 600px) {
     .controls {
         grid-template-columns: 1fr;
     }
-
     input {
         width: 100%;
         font-size: 16px;
     }
-
     button {
         width: 100%;
     }
 }
 
+
 /* Transition Styling */
+
+
 /* Styling for transitions */
-body, .controls, #plot, #performanceTable {
+
+body,
+.controls,
+#plot,
+#performanceTable {
     transition: background 0.3s ease, color 0.3s ease;
 }
 
+
 /* Progress Bar Styling */
+
 .progress-container {
     width: 100%;
     max-width: 1200px;

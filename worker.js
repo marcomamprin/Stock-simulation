@@ -1,8 +1,9 @@
-self.onmessage = function (event) {
+self.onmessage = function(event) {
     const { simulations, S0, mu, sigma, N, dt, deposit, depositFreq, model } = event.data;
 
     function randomNormal() {
-        let u = Math.random(), v = Math.random();
+        let u = Math.random(),
+            v = Math.random();
         return Math.sqrt(-2.0 * Math.log(u)) * Math.cos(2.0 * Math.PI * v);
     }
 
@@ -24,7 +25,10 @@ self.onmessage = function (event) {
     function simulateHeston() {
         let S = new Float64Array(N);
         S[0] = S0;
-        let v = sigma * sigma, kappa = 2.0, theta = sigma * sigma, eta = 0.3;
+        let v = sigma * sigma,
+            kappa = 2.0,
+            theta = sigma * sigma,
+            eta = 0.3;
         for (let i = 1; i < N; i++) {
             let dW1 = Math.sqrt(dt) * randomNormal();
             let dW2 = Math.sqrt(dt) * randomNormal();
@@ -37,7 +41,9 @@ self.onmessage = function (event) {
     function simulateJumpDiffusion() {
         let S = new Float64Array(N);
         S[0] = S0;
-        let lambda = 0.1, jumpMean = 0.02, jumpStd = 0.05;
+        let lambda = 0.1,
+            jumpMean = 0.02,
+            jumpStd = 0.05;
         for (let i = 1; i < N; i++) {
             let dW = Math.sqrt(dt) * randomNormal();
             let J = (Math.random() < lambda * dt) ? Math.exp(jumpMean + jumpStd * randomNormal()) : 1;
@@ -59,7 +65,10 @@ self.onmessage = function (event) {
     function simulateFamaFrench() {
         let S = new Float64Array(N);
         S[0] = S0;
-        let SMB = 0.03 * dt, HML = 0.02 * dt, betaSMB = 0.5, betaHML = 0.3;
+        let SMB = 0.03 * dt,
+            HML = 0.02 * dt,
+            betaSMB = 0.5,
+            betaHML = 0.3;
         for (let i = 1; i < N; i++) {
             let dW = Math.sqrt(dt) * randomNormal();
             let famaFrenchFactor = betaSMB * SMB + betaHML * HML;
@@ -70,12 +79,18 @@ self.onmessage = function (event) {
 
     function simulateModel() {
         switch (model) {
-            case "GBM": return simulateGBM();
-            case "Heston": return simulateHeston();
-            case "JumpDiffusion": return simulateJumpDiffusion();
-            case "MonteCarlo": return simulateMonteCarlo();
-            case "FamaFrench": return simulateFamaFrench();
-            default: throw new Error("Model not implemented.");
+            case "GBM":
+                return simulateGBM();
+            case "Heston":
+                return simulateHeston();
+            case "JumpDiffusion":
+                return simulateJumpDiffusion();
+            case "MonteCarlo":
+                return simulateMonteCarlo();
+            case "FamaFrench":
+                return simulateFamaFrench();
+            default:
+                throw new Error("Model not implemented.");
         }
     }
 

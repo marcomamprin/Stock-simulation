@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -9,7 +10,10 @@
     <script async src="https://www.googletagmanager.com/gtag/js?id=G-F776RN5TYW"></script>
     <script>
         window.dataLayer = window.dataLayer || [];
-        function gtag(){dataLayer.push(arguments);}
+
+        function gtag() {
+            dataLayer.push(arguments);
+        }
         gtag('js', new Date());
         gtag('config', 'G-F776RN5TYW');
     </script>
@@ -19,39 +23,39 @@
     <script src="script.js" defer></script>
     <link rel="stylesheet" href="styles.css">
 </head>
+
 <body>
     <div class="container">
         <header>
             <h1>Stock Price Simulation Tool</h1>
             <div style="display: none;">
-                <button id="darkModeToggle" >🌙 Dark Mode</button>
+                <button id="darkModeToggle">🌙 Dark Mode</button>
                 <!-- <button id="currencyToggle" class="currency-toggle">€</button> -->
             </div>
             <!-- Buy Me a Coffee Button -->
             <a href="https://www.buymeacoffee.com/marcophd" target="_blank" style="position: fixed; bottom: 20px; right: 20px; z-index: 1000;">
-                <img src="https://img.buymeacoffee.com/button-api/?text=Buy me a coffee&emoji=&slug=marcophd&button_colour=FFDD00&font_colour=000000&font_family=Arial&outline_colour=000000&coffee_colour=ffffff" 
-                    alt="Buy Me a Coffee" style="height: 50px; width: auto; border-radius: 8px; box-shadow: 2px 2px 10px rgba(0, 0, 0, 0.2);">
+                <img src="https://img.buymeacoffee.com/button-api/?text=Buy me a coffee&emoji=&slug=marcophd&button_colour=FFDD00&font_colour=000000&font_family=Arial&outline_colour=000000&coffee_colour=ffffff" alt="Buy Me a Coffee" style="height: 50px; width: auto; border-radius: 8px; box-shadow: 2px 2px 10px rgba(0, 0, 0, 0.2);">
             </a>
 
         </header>
 
-    <div class="controls">
-        <label title="The number of simulations to run. More simulations provide more accurate results but take longer to compute.">📈 Number of Simulations: <input type="number" id="numStocks" value="100" min="10" max="500" oninput="validateInteger(this, 100, 500)" inputmode="numeric" pattern="[0-9]*"></label>
-        <label title="The time period over which the simulation will run, in years.">⏳ Time Period (Years): <input type="number" id="timePeriod" value="20" min="1" max="150" oninput="validateInteger(this, 1, 150)" inputmode="numeric" pattern="[0-9]*"></label>
-        <label title="The initial amount of money deposited into the portfolio.">💵 Initial Deposit: <span class="currency-symbol">$</span>
+        <div class="controls">
+            <label title="The number of simulations to run. More simulations provide more accurate results but take longer to compute.">📈 Number of Simulations: <input type="number" id="numStocks" value="100" min="10" max="500" oninput="validateInteger(this, 100, 500)" inputmode="numeric" pattern="[0-9]*"></label>
+            <label title="The time period over which the simulation will run, in years.">⏳ Time Period (Years): <input type="number" id="timePeriod" value="20" min="1" max="150" oninput="validateInteger(this, 1, 150)" inputmode="numeric" pattern="[0-9]*"></label>
+            <label title="The initial amount of money deposited into the portfolio.">💵 Initial Deposit: <span class="currency-symbol">$</span>
             <input type="number" id="initialPrice" value="1000" min="0" step="1000" oninput="validateInteger(this, 1, Infinity)" inputmode="numeric" pattern="[0-9]*">
         </label>
-        <label title="The amount of money added to the portfolio at each deposit interval.">💰 Additional Deposit: <span class="currency-symbol">$</span><input type="number" id="depositAmount" value="50" min="0" step="50" oninput="validateInteger(this, 0, Infinity)" inputmode="numeric" pattern="[0-9]*"></label>
-        <label title="How often additional deposits are made into the portfolio.">📅 Deposit Frequency:
+            <label title="The amount of money added to the portfolio at each deposit interval.">💰 Additional Deposit: <span class="currency-symbol">$</span><input type="number" id="depositAmount" value="50" min="0" step="50" oninput="validateInteger(this, 0, Infinity)" inputmode="numeric" pattern="[0-9]*"></label>
+            <label title="How often additional deposits are made into the portfolio.">📅 Deposit Frequency:
             <select id="depositFrequency">
                 <option value="daily">Daily</option>
                 <option value="monthly" selected>Monthly</option>
                 <option value="yearly">Yearly</option>
             </select>
         </label>
-    </div>
-    <div class="controls">
-        <label title="Select a predefined index or choose 'Custom' to input your own expected return and volatility.">📈 Select Index:
+        </div>
+        <div class="controls">
+            <label title="Select a predefined index or choose 'Custom' to input your own expected return and volatility.">📈 Select Index:
             <select id="indexSelect" class="index-select">
                 <option value="" title="Define a custom index or select from the available options.">Custom</option>
                 <option value="S&P500" title="The S&P 500 tracks the performance of 500 large U.S. companies, representing a broad measure of the U.S. stock market.">S&P 500</option>
@@ -67,9 +71,9 @@
                 <option value="JP10Y" title="The Japan 10-Year Bond yield represents the interest rate on 10-year Japanese government bonds, used to gauge Japan's economic stability.">Japan 10-Year Bond</option>
             </select>            
         </label>
-        <label title="The expected annual return of the portfolio, expressed as a percentage.">📊 Expected Return: <input type="number" id="mu" value="12" step="0.5" min="0" oninput="validateDecimal(this, 0, Infinity, 0)" inputmode="decimal" pattern="[0-9]*">%</label>
-        <label title="The annual volatility of the portfolio, expressed as a percentage.">📉 Volatility: <input type="number" id="sigma" value="15" step="0.5" min="0" oninput="validateDecimal(this, 0, Infinity, 0)" inputmode="decimal" pattern="[0-9]*">%</label>
-        <label title="Select the model used for the simulation. Each model has different assumptions and characteristics.">📈 Select Model:
+            <label title="The expected annual return of the portfolio, expressed as a percentage.">📊 Expected Return: <input type="number" id="mu" value="12" step="0.5" min="0" oninput="validateDecimal(this, 0, Infinity, 0)" inputmode="decimal" pattern="[0-9]*">%</label>
+            <label title="The annual volatility of the portfolio, expressed as a percentage.">📉 Volatility: <input type="number" id="sigma" value="15" step="0.5" min="0" oninput="validateDecimal(this, 0, Infinity, 0)" inputmode="decimal" pattern="[0-9]*">%</label>
+            <label title="Select the model used for the simulation. Each model has different assumptions and characteristics.">📈 Select Model:
             <select id="modelSelect" class="model-select">
                 <option value="GBM" title="Geometric Brownian Motion (GBM) is a stochastic process widely used to model stock prices and other financial assets. It assumes continuous price movements with constant drift and volatility.">
                     Geometric Brownian Motion (GBM)
@@ -88,49 +92,51 @@
                 </option>
             </select>
         </label>
-    </div>
-    <div class="center-button" style="margin-bottom: 20px;">
-        <button onclick="simulate()">🔄 Run Simulation</button>
-    </div>
-
-    <div id="totalPortfolioValueContainer" style="display: none;">
-        <div id="plot"></div>
-    </div>
-    
-    <div id="plotContainer" style="display: none;">
-        <div id="plot"></div>
-    </div>
-        
-    <div id="performanceTableContainer" style="display: none;">
-        <h2>📊 Performance Summary</h2>
-        <table id="performanceTable">
-            <thead>
-                <tr>
-                    <th>Year</th>
-                    <th>Total Deposit</th>
-                    <th class="tooltip">Optimistic Scenario</th>
-                    <th class="tooltip highlight">Average Scenario</th>
-                    <th class="tooltip">Pessimistic Scenario</th>
-                </tr>
-            </thead>
-            <tbody></tbody>
-        </table>
-    </div>
-
-    <div class="center-button" id="savePdfButton" style="display: none;">
-        <button onclick="generatePDF()">📄 Save as PDF</button>
-    </div>
-
-    <div class="progress-container" id="progressContainer">
-        <div class="progress-bar">
-            <div class="progress-bar-fill" id="progressBarFill"></div>
         </div>
-    </div>
+        <div class="center-button" style="margin-bottom: 20px;">
+            <button onclick="simulate()">🔄 Run Simulation</button>
+        </div>
 
-    <footer>
-        <p>&copy; 2025 Risk-Dynamics. All rights reserved.</p>
-        <p>This tool is intended for educational and informational purposes only. It does not provide financial, investment, or legal advice. The simulations and data presented are based on mathematical models and historical assumptions, which do not guarantee future performance. Users should conduct their own research and consult with a professional before making any financial or investment decisions. The creators of this tool are not responsible for any losses incurred from its use.</p>
-    </footer>
+        <div id="totalPortfolioValueContainer" style="display: none;">
+            <div id="plot"></div>
+        </div>
+
+        <div id="plotContainer" style="display: none;">
+            <div id="plot"></div>
+        </div>
+
+        <div id="performanceTableContainer" style="display: none;">
+            <h2>📊 Performance Summary</h2>
+            <table id="performanceTable">
+                <thead>
+                    <tr>
+                        <th>Year</th>
+                        <th>Total Deposit</th>
+                        <th class="tooltip">Optimistic Scenario</th>
+                        <th class="tooltip highlight">Average Scenario</th>
+                        <th class="tooltip">Pessimistic Scenario</th>
+                    </tr>
+                </thead>
+                <tbody></tbody>
+            </table>
+        </div>
+
+        <div class="center-button" id="savePdfButton" style="display: none;">
+            <button onclick="generatePDF()">📄 Save as PDF</button>
+        </div>
+
+        <div class="progress-container" id="progressContainer">
+            <div class="progress-bar">
+                <div class="progress-bar-fill" id="progressBarFill"></div>
+            </div>
+        </div>
+
+        <footer>
+            <p>&copy; 2025 Risk-Dynamics. All rights reserved.</p>
+            <p>This tool is intended for educational and informational purposes only. It does not provide financial, investment, or legal advice. The simulations and data presented are based on mathematical models and historical assumptions, which do not
+                guarantee future performance. Users should conduct their own research and consult with a professional before making any financial or investment decisions. The creators of this tool are not responsible for any losses incurred from its use.</p>
+        </footer>
     </div>
 </body>
+
 </html>
